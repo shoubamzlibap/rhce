@@ -15,7 +15,7 @@ configuratin file. Then enable samba in the firewall, start the service and enab
     success
     [root@rhce2 ~]# firewall-cmd --reload
     success
-    [root@rhce2 ~]# systemctl start smb
+    [root@rhce2 ~]# systemctl start smb nmb
     [root@rhce2 ~]# setsebool -P samba_enable_home_dirs on
 
 If you want to export a different direcory, you could for example use the provided +[public]+ share:
@@ -28,12 +28,24 @@ If you want to export a different direcory, you could for example use the provid
             public = yes
             writable = yes
             printable = no
-            write list = +staff
+            write list = @staff
 
 *Note that the samba users - which are mapped to system users - need to have permissions on the directories that we want to export.*
 So if I have a systemuser +isaac+, I need to add that user also to samba (+smbpasswd -a isaac+), and then give read (and write) 
 permission to isaac on the exported dir. This can be acomplished in different kinds of ways, either through classic filesystem
 permissions, or with ACLs, which is much more flexible and probably what you want in this case.
+
+If the samba share is owned by a specific group, it is advisable to give the SGID bit on the parent directory:
+
+    chgrp staff /home/samba
+    chmod 2775 /home/samba
+
+To see all possible configuration items, use
+
+    testparm -v
+
+Without the +-v+, only currently set items are shown.
+
 
 Mounting a samba share on a client
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -54,6 +66,13 @@ If you want to mount remote samba shares as homedirs, you need to toggle the fol
     setsebool -P use_samba_home_dirsi=on
 
 This is not to be confused with +samba_enable_home_dirs+, which controls the exporting of homedrs.
+
+Multiuser mounts
+~~~~~~~~~~~~~~~~
+
+To mount a share with multiuser functionality, user a fstab entry like this:
+
+    //rhce1/sharename cifs credentials=/root/smbcred.txt,multiuser,sec=ntlmssp 0 0
 
 Tools
 ~~~~~

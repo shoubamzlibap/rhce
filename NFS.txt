@@ -91,10 +91,14 @@ Check http://www.certdepot.net/rhel7-use-kerberos-control-access-nfs-network-sha
 
 The following is not a complete list, but some of the things I need to remember.
 
-*On the server*: In +/etc/sysconfig/nfs+, make sure to have
+You will need to kerberize your client and server. The important thing is to have your +/etc/krb5.conf+ and +/etc/krb5.keytab+ on 
+both client and server. In the scope of rhce, these files will be provided.
+
+*On the server*: In +/etc/sysconfig/nfs+, in order to export SELinux labels, make sure to have
 
     RPCNFSDARGS="-V 4.2"
 
+as previous versions of nfs did not support this. Then start and enable *nfs-secure-server*.
 Then, in your +/etc/exports+, have something like
 
     /securenfs clientfoobar(sec=krb5p,rw)
@@ -102,6 +106,15 @@ Then, in your +/etc/exports+, have something like
 Here the interesting part ist the +sec=krb5p+. This offers authentication, encryption and integrity via kerberos.
 Other options would be +krb5i+, which would be authentication and integrity, and +krb5+, which would be authentication only.
 
+*On the client*: 
+
+Start and enable  *nfs-secure* on the client. Then add something like the following to your +/etc/fstab+:
+
+    rhce1:/securenfs    /mnt/nfs    nfs defaults,v4.2,sec=krb5p 0 0
+
+It might be nessessary to modify the SELinux content of exported files or dirs:
+
+    chchon -t public_content_t /securenfs/mytestfile.txt
 
 General NFS Options
 ~~~~~~~~~~~~~~~~~~~

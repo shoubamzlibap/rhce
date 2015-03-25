@@ -97,6 +97,10 @@ helpfull to create a file in the standard location and check which context gets 
 This specific regualr expression is important, and it should be explained(???). The manpage for this particular subcommand 
 can be read with +man semanage-fcontext+
 
+A list of examples for the regular expression can be optained with e.g.
+
+    semanage fcontext -l |grep "/var/www"
+
 A different approach is to take an existing directory with the correct context and use that as a template:
 
     semanage fcontext -a -e /var/www/html /opt/www/html
@@ -135,4 +139,10 @@ If there is no suitable file or port context for your needs, you can create your
 semanage. Note that the +-i|--install+ option is not documented in the manpages.
 
 EXERCISE: do this httpd with custom doc root
+
+Changing file context
+~~~~~~~~~~~~~~~~~~~~~
+File contexts can be changed on the fly with e.g.
+
+    chcon -t public_content_t /nfsshare
 
