@@ -1,0 +1,18 @@
+Cheatsheet
+----------
+
+This is no intent to cheat, but rather a fictional cheat sheet. Here I write down bits and peaces that
+I find hard to remember. By writing them down here, I remember them, so no need to cheat :).
+
+Samba
+~~~~~
+Start both smb and nmb.
+
+Mount options for multiuser mount: credentials=/root/credfile.txt,multiuser,sec=ntmlssp
+
+Kerberized NFS
+~~~~~~~~~~~~~~
+In +/etc/sysconfig/nfs+, set +RPCNFSDARGS="-V 4.2"+. This allows you to export SELinux contexts.
+
+Mount options: defaults,sec=krb5p,v4.2
+
