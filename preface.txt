@@ -1,0 +1,9 @@
+Preface
+-------
+
+These are notes I took during preparation for the RHCE exam. I followed the RHCE book by Markus Frei, and also read some of the official
+Redhat documentation. I have omited topics that I felt comfortable with already, so this is by no means a complete study guide.
+
+To actually try out things I had two virtual boxes with centos 7.0 installed.
+
+

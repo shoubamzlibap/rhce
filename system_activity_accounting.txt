@@ -1,0 +1,22 @@
+System Activity Accounting
+--------------------------
+
+Various aspects of system activity (cpu, ram, device throughput, ...) can be monitored with +sar+.
++sar+ collects the data and writes it to daily binary reports under +/var/log/sa/+.
+
++sar+ is contained in the +sysstat+ package. Without any options, +sar+ displays cpu activity. Consult the man page
+for the myriard of options available.
+
+The frequency of measurement is controlled by the cronjob defined in +/etc/cron.d/sysstat+. Other parameters (e.g. how
+many files to keep) are stored in +/etc/sysconfig/sysstat+.
+
+Another tool contained in the +sysstat+ package is +iostat+. It can be called like this:
+
+    iostat <intervall lenth in seconds> <number of interfalls to display>
+
+E.g. 
+    
+    iostat 2 5
+
+Without the number of intervalls, new data is displayed for ever.
+

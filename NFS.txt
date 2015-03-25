@@ -1,0 +1,118 @@
+NFS
+---
+
+Setting up a kerberos server
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+One of the requirements for the RHCE is to authenticate various services using kerberos.
+Setting up a kerberos server itself is not part of the exam, but for preparational 
+purposes, I set one up using the following guide:
+https://gist.github.com/ashrithr/4767927948eca70845db [kerberos basic setup].
+
+I had to do a few things which are not mentioned in the original guide. Most of
+them are probably obvious, but I still mention them here for completness.
+
+Add the kerberos service to the firewall:
+
+    [root@rhce2 services]# firewall-cmd --permanent --add-service=kerberos
+    success
+    [root@rhce2 ~]# firewall-cmd --reload
+    success
+
+Define a new service for the kerberos admin service (see also http://b.minwi.com/2014/09/11/define-a-new-service-in-firewalld/):
+
+    [root@rhce2 services]# cat /etc/firewalld/services/kerberos-adm.xml
+    <?xml version="1.0" encoding="utf-8"?>
+    <service>
+      <short>Kerberos-adm</short>
+      <description>Kerberos-adm network authentication protocol server</description>
+      <port protocol="tcp" port="749"/>
+      <port protocol="udp" port="749"/>
+    </service>
+
+Not the port 749. Then add that service to the firewall:
+
+    [root@rhce2 services]# firewall-cmd --permanent --add-service=kerberos-adm
+    success
+    [root@rhce2 services]# firewall-cmd --reload
+    success
+
+Also there is a typo, the command to add a principal on the client should be
+
+    addprinc -randkey host/client.example.com
+
+Exporting directories ro and rw with no auth
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Exporting a direcorty without authentication (only IP address of client is checked if desired) is rather simple. Install 
++nfs-utils+, start and enable the +nfs+ service, and add it to the firewall.
+
+A simple +/etc/exports+ could look like this
+
+    /export *(ro)
+
+This allows everybody to mount +/export+ read only. If the +*+ is replaced with an IP-address, or a subnet, then
+only clients with this adress or from this subnet can mount.
+
+In order to export a directory writable, you have two possibilities:
+
+    * make the exported dir owned by +nfsnobody+ (and use +root_squash+ as an option for the export)
+    * make the exported dir owned and mounted by root, and use the option +no_root_squahs+.
+
+Because the latter has some security implications, I would use the former. The option +root_squash+ maps files which would
+belong to the root user on a client to the user "nfsnobody".
+
+In order to make changes to +/etc/fstab+ visible to the server, it is not nessessary to restart the server, a simple
+    
+    exportfs -r
+
+will do.
+
+On the client (or on the server), you can check which filesystems are exported on a nfs server with
+
+    showmount -e your.nfs.server
+
+Notice that you need to enable +mountd+ and +rpc-bind+ in the firewall for this to work.
+
+NFS and Firewall
+~~~~~~~~~~~~~~~~
+In order to run an nfs server, you need to enable the following services in the firewall:
+
+    * nfs
+    * mountd
+    * rpc-bind
+
+The latter two are not absolutly nessessary, but in order to make +showmount+ work, they are needed.
+
+Kerberizing NFS
+~~~~~~~~~~~~~~~
+
+Check http://www.certdepot.net/rhel7-use-kerberos-control-access-nfs-network-shares/ . 
+
+The following is not a complete list, but some of the things I need to remember.
+
+*On the server*: In +/etc/sysconfig/nfs+, make sure to have
+
+    RPCNFSDARGS="-V 4.2"
+
+Then, in your +/etc/exports+, have something like
+
+    /securenfs clientfoobar(sec=krb5p,rw)
+
+Here the interesting part ist the +sec=krb5p+. This offers authentication, encryption and integrity via kerberos.
+Other options would be +krb5i+, which would be authentication and integrity, and +krb5+, which would be authentication only.
+
+
+General NFS Options
+~~~~~~~~~~~~~~~~~~~
+
+Here are some general NFS Options:
+
+    * +ro+ read only
+    * +rw+ read write
+    * +sync+ make sure all writes are synchronized to disk bevor acknowledging a successfull write. This improves data security, but costs (quite a lot of) performance
+    * +root_squash+ All files created on the client by root will have its ownership mapped to a less privileged user. This is the default. The opposite would be +no_root_squash+, which is less advisable from a security point of view.
+    * +insecure+ client requests are allowed to come from an unprivileged port (meaning normal users can mount). The default is the oposite, which is +secure+.
+    * +nohide+ Show mounted directories inside the export. The default is +hide+.
+
+

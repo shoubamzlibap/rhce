@@ -1,0 +1,71 @@
+Samba
+-----
+
+Basics
+~~~~~~
+
+Install the samba server by installing the packages +samba+ and +samba-client+. This gives you a well documented
++/etc/samba/smb.conf+.
+
+By default, it exports homedirs and printers. Make sure to read the section about SELinux at the top of the default
+configuratin file. Then enable samba in the firewall, start the service and enable home dir sharing in SELinux:
+
+    [root@rhce2 ~]# vim /etc/samba/smb.conf
+    [root@rhce2 ~]# firewall-cmd --permanent --add-service=samba
+    success
+    [root@rhce2 ~]# firewall-cmd --reload
+    success
+    [root@rhce2 ~]# systemctl start smb
+    [root@rhce2 ~]# setsebool -P samba_enable_home_dirs on
+
+If you want to export a different direcory, you could for example use the provided +[public]+ share:
+
+    # A publicly accessible directory that is read only, except for users in the
+    # "staff" group (which have write permissions):
+            [public]
+            comment = Public Stuff
+            path = /home/samba
+            public = yes
+            writable = yes
+            printable = no
+            write list = +staff
+
+*Note that the samba users - which are mapped to system users - need to have permissions on the directories that we want to export.*
+So if I have a systemuser +isaac+, I need to add that user also to samba (+smbpasswd -a isaac+), and then give read (and write) 
+permission to isaac on the exported dir. This can be acomplished in different kinds of ways, either through classic filesystem
+permissions, or with ACLs, which is much more flexible and probably what you want in this case.
+
+Mounting a samba share on a client
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To mount a samba share on an client, you issue something like this:
+
+    mount -t cifs //10.23.23.52/public /mnt/smb/ -o username=isaac,password=xxxxx
+
+Note that this requires the package +cifs_utils+ (it provides mount.cifs). Also note that the syntax for
+specfying a share is
+
+    //<hostname or IP>/<share name>
+
+where +<share name>+ is NOT the path on the server, but the name of the share, as specified in square brackets, see above.
+
+If you want to mount remote samba shares as homedirs, you need to toggle the following SELinux boolean:
+
+    setsebool -P use_samba_home_dirsi=on
+
+This is not to be confused with +samba_enable_home_dirs+, which controls the exporting of homedrs.
+
+Tools
+~~~~~
+
+You can get a listing of all samba users with
+
+    pdbedit --list
+
+There is a tool to edit the samba passwords:
+
+    smbpasswd -a <username>
+
+This will add a user to the local samba passwd file.
+
+

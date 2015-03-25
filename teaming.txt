@@ -1,0 +1,100 @@
+Teaming 
+-------
+A good intrucution to managing teams with nmcli is given by
+
+* https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/7/html/Networking_Guide/sec-Configure_a_Network_Team_Using-the_Command_Line.html[RedHat]
+and
+* http://docs.fedoraproject.org/en-US/Fedora/20/html/Networking_Guide/sec-Configure_Network_Teaming_Using_nmcli.html[Fedora]
+
+
+Teaming with nmcli
+~~~~~~~~~~~~~~~~~~
+
+Create a new team connection using roundrobin with the two interfaces enp0s9 and enp0s10:
+
+
+    nmcli connection add type team con-name team0  ifname veteam0
+    #nmcli connection modify team0 ipv4.addresses  "10.23.23.77/24 10.23.23.1 "
+    nmcli connection modify team0 team.config roundrobin.conf
+    [root@rhce1 ~]# cat roundrobin.conf
+    {
+            "device":               "team0",
+            "runner":               {"name": "roundrobin"},
+            "ports":                {"enp0s9": {}, "enp0s10": {}}
+    }
+    # add slave interfaces
+    nmcli connection add type team-slave con-name team0-port0 ifname enp0s9 master team0
+    nmcli connection add type team-slave con-name team0-port1 ifname enp0s10 master team0
+
+Each slave interface needs to be configured with a seperate connection of type "team-slave".
+
+The above works, but bringing team0 down and up again without a reboot does not work.  For some reason, when bringng team0 down, the devices it uses are disconnected. If you try to reconnect them first
+
+    [root@rhce1 ~]# nmcli con down team0
+    [root@rhce1 ~]# nmcli dev st
+    DEVICE   TYPE      STATE         CONNECTION
+    enp0s3   ethernet  connected     Wired connection 1
+    enp0s8   ethernet  connected     hostonly
+    enp0s10  ethernet  disconnected  --
+    enp0s9   ethernet  disconnected  --
+    lo       loopback  unmanaged     --
+    [root@rhce1 ~]# nmcli dev connect enp0s9
+    Error: Device activation failed: The device has no connections available.
+    [root@rhce1 ~]# nmcli dev st
+    DEVICE   TYPE      STATE         CONNECTION
+    enp0s3   ethernet  connected     Wired connection 1
+    enp0s8   ethernet  connected     hostonly
+    enp0s10  ethernet  disconnected  --
+    enp0s9   ethernet  unavailable   --
+    lo       loopback  unmanaged     --
+    [root@rhce1 ~]# nmcli dev connect enp0s10
+    Device 'enp0s10' successfully activated with '1ad12cb7-767f-4886-b222-692560498b0d'.
+
+    [root@rhce1 ~]# nmcli con up team0
+    Connection successfully activated (D-Bus active path: /org/freedesktop/NetworkManager/ActiveConnection/7)
+    [root@rhce1 ~]# nmcli dev st
+    DEVICE   TYPE      STATE        CONNECTION
+    enp0s10  ethernet  connected    team0-port1
+    enp0s3   ethernet  connected    Wired connection 1
+    enp0s8   ethernet  connected    hostonly
+    veteam0  team      connected    team0
+    enp0s9   ethernet  unavailable  --
+    lo       loopback  unmanaged    --
+
+You can activate team0 again, but with just one interface.
+
+Teaming with traditional ifcfg
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The following traditional configuration works:
+
+    [root@rhce1 network-scripts]# for i in ifcfg-enp0s* ifcfg-team0 ;do echo $i;echo ===========; cat $i;echo ;done
+    ifcfg-enp0s10
+    ===========
+    DEVICE="enp0s10"
+    ONBOOT="yes"
+    DEVICETYPE="TeamPort"
+    TEAM_MASTER="team0"
+
+    ifcfg-enp0s9
+    ===========
+    DEVICE="enp0s9"
+    ONBOOT="yes"
+    DEVICETYPE="TeamPort"
+    TEAM_MASTER="team0"
+
+    ifcfg-team0
+    ===========
+    TEAM_MASTER="team0"
+    DEVICE="team0"
+    DEVICETYPE="Team"
+    ONBOOT="yes"
+    BOOTPROTO=none
+    TEAM_CONFIG='{"runner": {"name": "roundrobin"}}'
+    IPADDR=10.23.23.77
+    GATEWAY=10.23.23.1
+
+To active this, restart the networking service:
+
+    systemctl restart network.service
+

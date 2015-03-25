@@ -1,0 +1,196 @@
+Firewall with firewalld
+-----------------------
+
+Usefull resources are
+
+*  http://www.certdepot.net/rhel7-get-started-firewalld/[certdepot.net]
+*  https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/7/html/Security_Guide/sec-Using_Firewalls.html[Redhat]
+*  https://fedoraproject.org/wiki/FirewallD[Fedora]
+
+General
+~~~~~~~
+The systemwide default zone is configured in
+
+    /etc/firewalld/firewalld.conf
+
+and can be changed either with an editor, or with
+
+    firewall-cmd --set-default-zone=<desired default zone>
+
+
+Quest: create a custom firewall zone
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The task we are persuing in order to learn about firewalld is to put team0 in an extra zone and 
+
+* block ssh
+* allow http/ or port 1234
+* for all clients / allow for only one client
+
+NOTE: When opening a nonstandard listener with nc, issue "setenforce 0" to put the server in permissive mode,
+otherwise SELinux will block access to the listener, as there is no policy allowing that listener.
+
+Create a new zone by copying one of the standard zones, e.g.:
+
+    [root@rhce1 ~]# cd /etc/firewalld/zones/
+    [root@rhce1 zones]# cp /usr/lib/firewalld/zones/drop.xml team.xml
+    [root@rhce1 zones]# vim team.xml 
+    [root@rhce1 zones]# cat team.xml
+    <?xml version="1.0" encoding="utf-8"?>
+    <zone target="DROP">
+      <short>team</short>
+      <description>Special Firewall zone for my team interface.</description>
+    </zone>
+
+
+Now you could go on editing the xml file with an editor to add services, but this could also be done using firewall-cmd.
+First, we check the active zones:
+
+    [root@rhce1 zones]# firewall-cmd --get-active-zones
+    public
+      interfaces: enp0s3 enp0s8 enp0s9 veteam0
+
+Then, we add the device to the zone:
+
+    [root@rhce1 ~]# nmcli connection modify team0 connection.zone team
+    [root@rhce1 ~]# nmcli connection show team0 |grep zone
+    connection.zone:                        team
+
+Verify with firewall-cmd that team0 was added to the zone team which is now active:
+
+    [root@rhce1 zones]# firewall-cmd --get-active-zones
+    public
+      interfaces: enp0s3 enp0s8 enp0s9
+    team
+      interfaces: veteam0
+
+Now we need to add our custom port to the zone team. First the code, then the explanation:
+
+    [root@rhce1 zones]# firewall-cmd --zone=team --list-ports
+    [root@rhce1 zones]# firewall-cmd --zone=team --add-port=1234/tcp --permanent
+    success
+    [root@rhce1 zones]# firewall-cmd --zone=team --list-ports
+    [root@rhce1 zones]# firewall-cmd --reload
+    success
+    [root@rhce1 zones]# firewall-cmd --zone=team --list-ports
+    1234/tcp
+
+First we check the open ports of the zone "team" - no ports open. Then we add our custom port and make it permanent.
+The we check again - still no ports open. A reload is required to make the changes effective (without reboot).
+
+Now with selinux in permissive mode, I start a custom listener like this:
+
+    nc -l 1234
+
+Now I _should_ be able to connect form the outside to that port. I am not, the remainder of this section contains debugging trials.
+
+
+
+I can not connect to that port from the outside (telnet 10.23.23.77 1234) with the firewall active.
+When I put team0 in the public zone and add the custom port, it somehow works:
+
+    [root@rhce1 ~]# nmcli connection modify team0 connection.zone public
+    [root@rhce1 zones]# firewall-cmd --zone=public --add-port=1234/udp --permanent
+    success
+    [root@rhce1 zones]# firewall-cmd --zone=public --add-port=1234/tcp --permanent
+    success
+    [root@rhce1 zones]# cat public.xml
+    <?xml version="1.0" encoding="utf-8"?>
+    <zone>
+      <short>Public</short>
+      <description>For use in public areas. You do not trust the other computers on networks to not harm your computer. Only selected incoming connections are accepted.</description>
+      <service name="dhcpv6-client"/>
+      <service name="ssh"/>
+      <port protocol="tcp" port="1234"/>
+      <port protocol="udp" port="1234"/>
+    </zone>
+    [root@rhce1 zones]# firewall-cmd --reload
+    success
+
+So there must be a subtle difference in the way the zones are configured. Maybe after removing the "DROP" from the
+team config, a complete firewall reload is needed:
+
+    firewall-cmd --complete-reload
+
+No, that does not help either.
+
+Also, ssh should be blocked for team0, but is not. It kind of looks like only the default zone is active, maybe because 
+both interfaces have addresses in the same subnet.
+So next steps are to create another hostonly subnet, put team0 (or whatever interface) in that subnet and
+try the same exercise again.
+
+Other try:
+ Query whether interface interface is bound to a zone.
+
+    [root@rhce1 ~]# firewall-cmd --get-active-zones
+    public
+      interfaces: enp0s3 enp0s8 enp0s9
+    block
+      interfaces: veteam0
+      sources: 10.23.23.11
+    [root@rhce1 ~]# man firewall-cmd
+    [root@rhce1 ~]# firewall-cmd --zone=block --query-interface=veteam0
+    yes
+    [root@rhce1 ~]# firewall-cmd --zone=public --query-interface=enp0s9
+    yes
+
+Still, it looks like the assignment to zones does not work, as connecting to port 22 always works, regardless of the zone the interface is in.
+
+Further question:
+
+* Q: If I add a port to a zone, does that apply to incoming or outgoing traffic? A: It applys to incoming traffic (CHAIN INPUT), listed ports will be allowed.
+* Q: If I add a source, does that exclude or include that source from traffic? A: If I add a source, all traffic from that source will be blocked.
+* What are the defaults for new zones? Like drop/reject, etc.
+
+Answers:
+By default, all ports are blocked.
+Guesses: if I add a source, only this source will be allowed ports and services which defined for that zone.
+
+
+Simpler Quest: create a network connection, which does not allow port 22.
+Adding interface enp0s10 to zone drop and reloading firewall does not block port 22. Obviously, I missed something.
+Strange enough, after sleep of laptop, now it works. Check again.
+
+Also, play around with issuing the same command with and without "--permanent", to change both runtime and permanent configuration.
+Also, first dropping everything, then opening port 22 does not open port 22, but adding service ssh does. Check again. Maybe also wait a little.
+Also, try defining custom port as a service first (/usr/lib/firewalld/services)
+
+
+Once again from start:
+
+    [root@rhce1 ~]# firewall-cmd --get-active-zones
+    drop
+      interfaces: enp0s10
+    public
+      interfaces: enp0s3 enp0s8 veteam0
+    [root@rhce1 ~]# firewall-cmd --zone=drop --list-all
+    drop (active)
+      interfaces: enp0s10
+      sources:
+      services:
+      ports:
+      masquerade: no
+      forward-ports:
+      icmp-blocks:
+      rich rules:
+
+    > Port 22 is blocked for enp0s10
+
+Now adding ssh:
+    [root@rhce1 ~]# firewall-cmd --zone=drop --list-all
+    drop (active)
+      interfaces: enp0s10
+      sources:
+      services: ssh
+      ports:
+      masquerade: no
+      forward-ports:
+      icmp-blocks:
+      rich rules:
+
+
+    > port 22 is still blocked
+
+And then sometimes, it just works. It seems this behaviour is highly undeterministic - there might be a bug. Either in the OS, or maybe 
+the virtual box virtual network is messing with us.
+

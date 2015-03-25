@@ -1,0 +1,86 @@
+Shell scripting
+---------------
+
+There are a lot of great resources on the web about shell scripting, so here I will
+only list bits and pieces that I was no aware of or did not know by heart.
+
+Special Variables
+~~~~~~~~~~~~~~~~~
+
+Some special variables
+    $*  -  all parameter in one string
+    $#  -  number of parameters given to a script or function
+
+
+Case
+~~~~
+
+A switch case construct is also available in bash, though I seldom use it:
+
+    case $1 in
+        foo) echo You entered foo ;;
+        ba[rz]) echo You entered something starting with ba, then r or z. ;;
+        *) echo I do not recognize this ;;
+    esac
+
+A point I was not aware of is the use of pathname expansion used in the cases.
+
+String manipulation
+~~~~~~~~~~~~~~~~~~~
+
+All sorts of string manipulation can be done in bash. Check +man bash+ for a comprehensive read. I was amazed to see what is 
+possible. 
+
+Anyway, here are a few examples of string manipulation in bash:
+
+    my_string="Hello World out there"
+    echo "my_string=${my_string}"
+    echo "Length of my_string is ${#my_string}"
+    echo "Substring, starting at 3, 5 chars long: ${my_string:3:5}"
+    echo "Matches are done according to the rules of filename expansion"
+    echo "removing prefix up to match of o, lazy: ${my_string#*o}"
+    echo "removing prefix up to match of o, greedy: ${my_string##*o}"
+    echo "removing postfix from match of o, lazy: ${my_string%o*}"
+    echo "removing postfix from match of o, greedy: ${my_string%%o*}"
+    echo "search and replace: ${my_string/World/Folks}"
+
+There is more you can do with variables in bash, have a look at the man page, its pretty well written.
+
+Loops
+~~~~~
+
+All sorts of loops are availabe. Of the usefull ones, this is the one I always forget about:
+
+    while read i; do
+        echo $i
+    done < myfile.txt
+
+This reads the content of the file +myfile.txt+ line by line.
+
+Miscellaneous
+~~~~~~~~~~~~~
+
+Date calculations relative to the current date can be done like this:
+
+    date -d "+12 weeks + 2 hours + 23 minutes"
+
+Write to stderr:
+    
+    echo This is an Error >&2
+
+You can create a temporary file or directory with +mktemp+. This could be usefull if you need a temporary file with a uniq name - +mktemp+ will
+take care of this:
+
+    [root@rhce1 ~]# x=$(mktemp /tmp/foobar.XXXX)
+    [root@rhce1 ~]# echo $x
+    /tmp/foobar.ZlZq
+    [root@rhce1 ~]# echo Hi >$x
+    [root@rhce1 ~]# cat $x
+    Hi
+
+Get a (pseude) random number:
+
+    echo $RANDOM
+
+Thats all, folks.
+

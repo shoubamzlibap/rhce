@@ -1,0 +1,108 @@
+Routing
+-------
+
+Configure static routes with iproute - nonpersistent
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Note: all route table manipulations with ip are lost after reboot.
+
+Show routes:
+
+    ip route
+
+Delete a route
+
+    ip route del <route>
+
+Example:
+
+    [root@rhce1 ~]# ip r
+    default via 10.23.23.99 dev enp0s8  proto static  metric 1024
+    10.0.2.0/24 dev enp0s3  proto kernel  scope link  src 10.0.2.15
+    10.23.23.0/24 dev enp0s8  proto kernel  scope link  src 10.23.23.51
+    10.23.23.0/24 dev veteam0  proto kernel  scope link  src 10.23.23.104
+    [root@rhce1 ~]# ip r del 10.23.23.0/24 dev veteam0
+    [root@rhce1 ~]# ip r
+    default via 10.23.23.99 dev enp0s8  proto static  metric 1024
+    10.0.2.0/24 dev enp0s3  proto kernel  scope link  src 10.0.2.15
+    10.23.23.0/24 dev enp0s8  proto kernel  scope link  src 10.23.23.51
+
+You can add static route using following command:
+
+    ip route add {NETWORK} via {IP} dev {DEVICE}
+
+Add a new default route:
+
+    ip r add default via <default gw>
+
+Example:
+
+    [root@rhce1 ~]# ip r add default via 10.0.2.2
+    [root@rhce1 ~]# ip r
+    default via 10.0.2.2 dev enp0s3
+    10.0.2.0/24 dev enp0s3  proto kernel  scope link  src 10.0.2.15
+    10.23.23.0/24 dev enp0s8  proto kernel  scope link  src 10.23.23.51
+    10.23.23.0/24 dev veteam0  proto kernel  scope link  src 10.23.23.104
+
+In order to make this persistent, you would need to put this in the appropriate file in
+
+    /etc/sysconfig/network-scripts/route-<interface>
+
+E.g.
+
+    GATEWAY0=192.168.1.254
+    NETMASK0=255.255.255.0
+    ADDRESS0=192.168.55.0
+    GATEWAY1=10.164.234.112
+    NETMASK1= 255.255.255.240
+    ADDRESS1=10.164.234.132
+
+The default gateway goes into
+
+    /etc/sysconfig/network # parameter is called GATEWAY
+
+
+Configuring static routes with nmcli - persistent
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+To configure static routes using the nmcli tool, the interactive editor mode must be used:
+
+    nmcli con edit <con name>
+
+    nmcli> set ipv4.routes 192.168.122.0/24 10.10.10.1
+    nmcli>
+    nmcli> save persistent
+
+To set the default route with NetworkManager, make sure only that interface providing the
+default gateway can set this (from https://mail.gnome.org/archives/networkmanager-list/2014-July/msg00080.html):
+
+NM automatically sets the default route based on two things:
+
+1. interface priority - all interfaces have a priority and if two interfaces are active, and *not* prevented from getting the default route (see #2), the one with the highest priority wins.  Right now, that's a static ordering but we're exploring how to make that dynamic.
+
+2. the "never-default" option: you can prevent connections (and thus their interface when that connection is active) from ever getting the default route by setting this option.  
+
+With nmcli: 
+
+    nmcli c mod eth0 ipv4.never-default true
+    nmcli c mod eth0 ipv6.never-default true
+
+would prevent connection "eth0" from ever receiving the IPv4 or IPv6
+default route.  This would allow some other connection/interface to
+receive the default route, when active.
+
+Example: 
+
+    root@rhce1 ~]# nmcli con mod hostonly ipv4.never-default true
+    [root@rhce1 ~]# ip r
+    default via 10.23.23.99 dev enp0s8  proto static  metric 1024
+    10.0.2.0/24 dev enp0s3  proto kernel  scope link  src 10.0.2.15
+    10.23.23.0/24 dev enp0s8  proto kernel  scope link  src 10.23.23.51
+    10.23.23.0/24 dev veteam0  proto kernel  scope link  src 10.23.23.104
+
+    root@rhce1 ~]# systemctl restart network.service
+
+    [root@rhce1 ~]# ip r
+    default via 10.0.2.2 dev enp0s3  proto static  metric 1024
+    10.0.2.0/24 dev enp0s3  proto kernel  scope link  src 10.0.2.15
+    10.23.23.0/24 dev enp0s8  proto kernel  scope link  src 10.23.23.51
+    10.23.23.0/24 dev veteam0  proto kernel  scope link  src 10.23.23.104
+

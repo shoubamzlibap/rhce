@@ -1,0 +1,133 @@
+Postfix
+-------
+
+master.cf
+~~~~~~~~~
+
+After installing the postfix package, you can find some default configuration files in +/etc/postfix+.
+There is the +master.cf+, which controls the master process. For the scope of
+what is expected for RHCE, I expect no modifications are needed to be made there.
+
+main.cf
+~~~~~~~
+And then there is the +main.cf+, where
+most of the configuration occurs. By default, the system can relay from local recepients to local
+recepients.
+
+You need to make sure the hostname is set correctly, with fqdn. If you want to relay mails from your
+local network, check the following two parameters:
+
+    mynetworks = 10.23.23.0/24, 127.0.0.1 # usually the default
+    inet_interfaces = all
+
++mynetworks+ specifies a range of hosts, which are trusted automatically, which means that mails from
+them will be accepted without any further checks.
+
++inet_interfaces+ specifies on which interfaces to listen to.
+
+There are other parameters that need to be set, but most of them have good defaults, and in order to
+do local mail delivery, everything is already set up.
+
+Mailrelay
+~~~~~~~~~
+If postfix is not only to deliver to local mailboxes, but forward mails that it can not deliver localy, a mail realy needs
+to be configured. This is done in +main.cf+ with the parameter
+
+    relayhost = rhce1.acme.ch
+    mydestination = $myhostname, localhost.$mydomain, localhost, $mydomain
+
+for example. After reloading postix, all mail that can not be delivered locally will be forwarded to relayhost.
+Note that +mydestination+ needed the appendix of +$mydomain+, otherwise postfix would not accept
+mails for other hosts in my domain.
+
+Aliases
+~~~~~~~
+Basic alias configuration is done in
+
+    /etc/aliases
+
+which is a simple text file. It defines aliases for local mail delivery. Check the contents of the file - it is already populated with 
+defaults. After you make changes to this file, it is important to issue
+
+    newaliases
+
+which reads the textfile and transforms it into a binary format (+/etc/aliases.db+),
+which will then be read by postfix. This does not require a restart
+of the postfix daemon.
+
+Tools
+~~~~~
+
+To check the actual setting of a parameter, it is helpfull to use the +postconf+ utility, which by
+default displays all parameters and their current setting. For example, to view the current +mynetworks+ setting,
+type
+
+    postconf |grep mynetworks
+
+In order to do basic testing, it can be helpfull to know the basic smtp commands. Connect to port 25 of your mail
+relay, then issue
+
+    root@rhce1 ~]# telnet rhce2 25
+    Trying 10.23.23.52...
+    Connected to rhce2.
+    Escape character is '^]'.
+    220 rhce2.acme.ch ESMTP Postfix
+    HELO rhce1.acme.ch
+    250 rhce2.acme.ch
+    MAIL FROM:isaac@acme.ch
+    250 2.1.0 Ok
+    RCPT TO:root@rhce2.acme.ch
+    250 2.1.5 Ok
+    DATA
+    354 End data with <CR><LF>.<CR><LF>
+    Hello root,
+
+    how do you do?
+
+    yours,
+    Isaac
+    .
+    250 2.0.0 Ok: queued as AE62E90CAF8
+
+The basic commands to remember are:
+
+    HELO <fqdn local host>
+    MAIL FROM:<sender mail address>
+    RCPT TO:<recipient mail address>
+    DATA 
+    . # finish with period, followed by a blank line.
+
+Each command is answered with a status code. 250 means "OK", 354 means "Start mail input; end with <CRLF>.<CRLF>".
+Then, on rhce2, we are informed that mail was received:
+
+    [root@rhce2 ~]#
+    You have mail in /var/spool/mail/root
+    [root@rhce2 ~]# cat /var/spool/mail/root
+    From isaac@acme.ch  Wed Mar  4 01:06:38 2015
+    Return-Path: <isaac@acme.ch>
+    X-Original-To: root@rhce2.acme.ch
+    Delivered-To: root@rhce2.acme.ch
+    Received: from rhce1.acme.ch (rhce1 [10.23.23.51])
+            by rhce2.acme.ch (Postfix) with SMTP id AE62E90CAF8
+            for <root@rhce2.acme.ch>; Wed,  4 Mar 2015 01:05:54 -0500 (EST)
+
+    Hello root,
+
+    how do you do?
+
+    yours,
+    Isaac
+
+So things are working. If not, check +/var/log/maillog+. Each mail gets its uniq ID, which is the last part of the conversation of
+the mta with the client (+250 2.0.0 Ok: queued as AE62E90CAF8+). We can grep for that ID to see what happend with that email:
+
+    [root@rhce2 ~]# grep AE62E90CAF8 /var/log/maillog
+    Mar  4 01:06:18 rhce2 postfix/smtpd[2734]: AE62E90CAF8: client=rhce1[10.23.23.51]
+    Mar  4 01:06:38 rhce2 postfix/cleanup[2737]: AE62E90CAF8: message-id=<>
+    Mar  4 01:06:38 rhce2 postfix/qmgr[2705]: AE62E90CAF8: from=<isaac@acme.ch>, size=227, nrcpt=1 (queue active)
+    Mar  4 01:06:38 rhce2 postfix/local[2738]: AE62E90CAF8: to=<root@rhce2.acme.ch>, relay=local, delay=44, delays=44/0.04/0/0.01, dsn=2.0.0, status=sent (delivered to mailbox)
+    Mar  4 01:06:38 rhce2 postfix/qmgr[2705]: AE62E90CAF8: removed
+    [root@rhce2 ~]#
+
+In this case we see that themail was queued and delivered to mailbox.
+

@@ -1,0 +1,123 @@
+Maria DB
+--------
+
+After installing +mariadb-server+, start the service +mariadb+, and enable it it the firewall. 
+In the firewall it is called +mysql+, because Maria DB is a fork of MySQL.
+
+You can connect to the database locally with
+
+    mysql -u root
+
+Securing the root Account
+~~~~~~~~~~~~~~~~~~~~~~~~~
+The default installatin does not have a password for the local root user. For security reasons,
+this should be changed. Also, there is more then one root account - accounts have not only
+a username, but also a hostpart from where the user connects, so e.g. root@'127.0.0.1' and
+root@'rhce1' are two different accounts, which each can have their own password. 
+
+Then there is an guest accout accessible to everyone, intended for testing, and a test
+database accessible to everyone, also for testing. These should be removed for production use.
+
+This can all be done using sql commands, but is a bit tedious, so there is a script
+provided which will guide you through all the steps and does the updates to the mariadb for you:
+
+    mysql_secure_installation
+
+This script can also restrict root access from localhost only.
+
+One could go further to rename the root account
+
+
+Adding sample data
+~~~~~~~~~~~~~~~~~~
+There is an official sample database, also used for trainings. It is publicly available:
+
+    wget http://downloads.mysql.com/docs/world_innodb.sql.gz
+
+Firt we need to create the database:
+
+    mysql -u root -p 
+    > create database world;
+    > exit;
+
+Then we load the unzipped data into that database:
+
+    mysql -u root -p world  </tmp/world_innodb.sql
+
+
+Navigating a database
+~~~~~~~~~~~~~~~~~~~~~
+Note the syntax: +mysql -u <username> -p <databasename>+. The +-p+ specifies to ask for a password, 
+alternativly you could also give the password on the commandline: +--password=xxxxx+, which is
+less favorable form a security standpoint.
+
+Now login again as root
+
+    mysql -u root -p
+
+and see which databases we have:
+
+    > show databases;
+
+select a database and see which tables it has:
+
+    > use world;
+    > show tables;
+
+Creating users
+~~~~~~~~~~~~~~
+Depending on the setup, it can be good practise to create at least two users per database. One that can only
+read, and one that can also write and create new tables:
+
+    > grant all on world.* to 'world-admin'@'10.23.23.%' identified by 'xxxxx';
+    > grant select on world.* to 'world-user'@'10.23.23.%' identified by 'xxxxx';
+    > flush privileges;
+
+Note the use of the wildcarc +%+ in the host identifier - this allows access from the whole subnet.
+The "flush" command forces mariadb to reread the privileges database.
+
+CRUD
+~~~~
+CRUD is an abreviation for "Create Read Update Delete", which are common actions performed on a database.
+A Read in MariaDB is done using the "select" statemente, e.g.:
+
+    mysql -u world-user -p -h rhce1
+    use world;
+    select Name from world where CountryCode='deu';
+    select * from world where CountryCode='deu';
+    select Name,CountryCode,Population from City where Name like '%ingen%';
+    select Name,CountryCode,Population from City where 1 order by Population desc limit 3;
+    select count(*), 'Citys in Germany' from City where CountryCode='deu';
+    select count(*) as cnt, District from City where CountryCode='deu' group by District \
+        order by cnt desc;
+
+Create/Insert:
+
+    insert into City (Name,District,CountryCode,Population) values ('Schoenau', \
+        'Baden Wuertemberg', 'deu', '2000');
+    ERROR 1142 (42000): INSERT command denied to user 'world-user'@'rhce1.lcsys.ch' \
+        for table 'City'
+    mysql -u world-admin -p -h rhce1
+    use world;
+    insert into City (Name,District,CountryCode,Population) values ('Schoenau', \
+       'Baden Wuertemberg', 'deu', '2000');
+    
+Update:
+
+    MariaDB [world]> update City set Population = Population + 4 where Name='Schoenau';
+
+Delete:
+
+    delete from City where Name='Schoenau';
+
+Complex Queries
+~~~~~~~~~~~~~~~
+
+    select * from City left join Country on City.CountryCode = Country.Code \
+        where City.Name = "Zürich";
+
+    select Country.Name from Country left join CountryLanguage on \
+        Country.Code = CountryLanguage.CountryCode where \
+        Language = "German" and IsOfficial = "T";
+
+

@@ -1,0 +1,553 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Notes on RHCE Exam Preparation</title><link rel="stylesheet" type="text/css" href="docbook-xsl.css" /><meta name="generator" content="DocBook XSL Stylesheets V1.78.1" /></head><body><div xml:lang="en" class="article" lang="en"><div class="titlepage"><div><div><h2 class="title"><a id="idm140323214981728"></a>Notes on RHCE Exam Preparation</h2></div><div><div class="author"><h3 class="author"><span class="firstname">Isaac</span> <span class="surname">Hailperin</span></h3><code class="email">&lt;<a class="email" href="mailto:isaac.hailperin@lcsystems.ch">isaac.hailperin@lcsystems.ch</a>&gt;</code></div></div><div><div class="revhistory"><table style="border-style:solid; width:100%;" summary="Revision History"><tr><th align="left" valign="top" colspan="3"><strong>Revision History</strong></th></tr><tr><td align="left">Revision 0.1</td><td align="left">2015-03</td><td align="left">IH</td></tr></table></div></div></div><hr /></div><div class="toc"><p><strong>Table of Contents</strong></p><dl class="toc"><dt><span class="section"><a href="#_preface">1. Preface</a></span></dt><dt><span class="section"><a href="#_teaming">2. Teaming</a></span></dt><dd><dl><dt><span class="section"><a href="#_teaming_with_nmcli">2.1. Teaming with nmcli</a></span></dt><dt><span class="section"><a href="#_teaming_with_traditional_ifcfg">2.2. Teaming with traditional ifcfg</a></span></dt></dl></dd><dt><span class="section"><a href="#_ipv6">3. IPv6</a></span></dt><dt><span class="section"><a href="#_routing">4. Routing</a></span></dt><dd><dl><dt><span class="section"><a href="#_configure_static_routes_with_iproute_nonpersistent">4.1. Configure static routes with iproute - nonpersistent</a></span></dt><dt><span class="section"><a href="#_configuring_static_routes_with_nmcli_persistent">4.2. Configuring static routes with nmcli - persistent</a></span></dt></dl></dd><dt><span class="section"><a href="#_firewall_with_firewalld">5. Firewall with firewalld</a></span></dt><dd><dl><dt><span class="section"><a href="#_general">5.1. General</a></span></dt><dt><span class="section"><a href="#_quest_create_a_custom_firewall_zone">5.2. Quest: create a custom firewall zone</a></span></dt></dl></dd><dt><span class="section"><a href="#_kernel_parameters">6. Kernel parameters</a></span></dt><dt><span class="section"><a href="#_authconfig">7. authconfig</a></span></dt><dt><span class="section"><a href="#_iscsi">8. iscsi</a></span></dt><dd><dl><dt><span class="section"><a href="#_on_the_server">8.1. On the server</a></span></dt><dt><span class="section"><a href="#_on_the_client">8.2. On the client</a></span></dt></dl></dd><dt><span class="section"><a href="#_system_activity_accounting">9. System Activity Accounting</a></span></dt><dt><span class="section"><a href="#_shell_scripting">10. Shell scripting</a></span></dt><dd><dl><dt><span class="section"><a href="#_special_variables">10.1. Special Variables</a></span></dt><dt><span class="section"><a href="#_case">10.2. Case</a></span></dt><dt><span class="section"><a href="#_string_manipulation">10.3. String manipulation</a></span></dt><dt><span class="section"><a href="#_loops">10.4. Loops</a></span></dt><dt><span class="section"><a href="#_miscellaneous">10.5. Miscellaneous</a></span></dt></dl></dd><dt><span class="section"><a href="#_installing_software">11. Installing Software</a></span></dt><dt><span class="section"><a href="#_selinux">12. SELinux</a></span></dt><dd><dl><dt><span class="section"><a href="#_policys">12.1. Policys</a></span></dt><dt><span class="section"><a href="#_booleans">12.2. Booleans</a></span></dt><dt><span class="section"><a href="#_audit">12.3. Audit</a></span></dt><dt><span class="section"><a href="#_selinux_in_practise">12.4. SELinux in practise</a></span></dt><dt><span class="section"><a href="#_create_your_own_selinux_module">12.5. Create your own SELinux module</a></span></dt></dl></dd><dt><span class="section"><a href="#_apache_httpd">13. Apache httpd</a></span></dt><dd><dl><dt><span class="section"><a href="#_basic_virtual_hosts">13.1. Basic virtual hosts</a></span></dt><dt><span class="section"><a href="#_https">13.2. https</a></span></dt><dt><span class="section"><a href="#_apache_and_php">13.3. apache and php</a></span></dt><dt><span class="section"><a href="#_apache_and_python">13.4. apache and python</a></span></dt></dl></dd><dt><span class="section"><a href="#_dns">14. DNS</a></span></dt><dd><dl><dt><span class="section"><a href="#_caching_only_name_server_with_bind">14.1. Caching only name server with bind</a></span></dt><dt><span class="section"><a href="#_caching_only_name_server_with_unbound">14.2. Caching only name server with unbound</a></span></dt><dt><span class="section"><a href="#_dns_troubleshooting">14.3. DNS-Troubleshooting</a></span></dt></dl></dd><dt><span class="section"><a href="#_nfs">15. NFS</a></span></dt><dd><dl><dt><span class="section"><a href="#_setting_up_a_kerberos_server">15.1. Setting up a kerberos server</a></span></dt><dt><span class="section"><a href="#_exporting_directories_ro_and_rw_with_no_auth">15.2. Exporting directories ro and rw with no auth</a></span></dt><dt><span class="section"><a href="#_kerberizing_nfs">15.3. Kerberizing NFS</a></span></dt><dt><span class="section"><a href="#_general_nfs_options">15.4. General NFS Options</a></span></dt></dl></dd><dt><span class="section"><a href="#_samba">16. Samba</a></span></dt><dd><dl><dt><span class="section"><a href="#_basics">16.1. Basics</a></span></dt><dt><span class="section"><a href="#_mounting_a_samba_share_on_a_client">16.2. Mounting a samba share on a client</a></span></dt><dt><span class="section"><a href="#_tools">16.3. Tools</a></span></dt></dl></dd><dt><span class="section"><a href="#_postfix">17. Postfix</a></span></dt><dd><dl><dt><span class="section"><a href="#_master_cf">17.1. master.cf</a></span></dt><dt><span class="section"><a href="#_main_cf">17.2. main.cf</a></span></dt><dt><span class="section"><a href="#_mailrelay">17.3. Mailrelay</a></span></dt><dt><span class="section"><a href="#_aliases">17.4. Aliases</a></span></dt><dt><span class="section"><a href="#_tools_2">17.5. Tools</a></span></dt></dl></dd><dt><span class="section"><a href="#_ssh">18. SSH</a></span></dt><dd><dl><dt><span class="section"><a href="#_keys">18.1. Keys</a></span></dt><dt><span class="section"><a href="#_various">18.2. Various</a></span></dt></dl></dd><dt><span class="section"><a href="#_ntp">19. NTP</a></span></dt><dd><dl><dt><span class="section"><a href="#_ntpdate_and_ntpd">19.1. ntpdate and ntpd</a></span></dt><dt><span class="section"><a href="#_chrony">19.2. chrony</a></span></dt></dl></dd><dt><span class="section"><a href="#_maria_db">20. Maria DB</a></span></dt><dd><dl><dt><span class="section"><a href="#_securing_the_root_account">20.1. Securing the root Account</a></span></dt><dt><span class="section"><a href="#_adding_sample_data">20.2. Adding sample data</a></span></dt><dt><span class="section"><a href="#_navigating_a_database">20.3. Navigating a database</a></span></dt><dt><span class="section"><a href="#_creating_users">20.4. Creating users</a></span></dt><dt><span class="section"><a href="#_crud">20.5. CRUD</a></span></dt><dt><span class="section"><a href="#_complex_queries">20.6. Complex Queries</a></span></dt></dl></dd></dl></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="_preface"></a>1. Preface</h2></div></div></div><p>These are notes I took during preparation for the RHCE exam. I followed the RHCE book by Markus Frei, and also read some of the official
+Redhat documentation. I have omited topics that I felt comfortable with already, so this is by no means a complete study guide.</p><p>To actually try out things I had two virtual boxes with centos 7.0 installed.</p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="_teaming"></a>2. Teaming</h2></div></div></div><p>A good intrucution to managing teams with nmcli is given by</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem">
+<a class="ulink" href="https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/7/html/Networking_Guide/sec-Configure_a_Network_Team_Using-the_Command_Line.html" target="_top">RedHat</a>
+and
+</li><li class="listitem">
+<a class="ulink" href="http://docs.fedoraproject.org/en-US/Fedora/20/html/Networking_Guide/sec-Configure_Network_Teaming_Using_nmcli.html" target="_top">Fedora</a>
+</li></ul></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_teaming_with_nmcli"></a>2.1. Teaming with nmcli</h3></div></div></div><p>Create a new team connection using roundrobin with the two interfaces enp0s9 and enp0s10:</p><pre class="literallayout">nmcli connection add type team con-name team0  ifname veteam0
+#nmcli connection modify team0 ipv4.addresses  "10.23.23.77/24 10.23.23.1 "
+nmcli connection modify team0 team.config roundrobin.conf
+[root@rhce1 ~]# cat roundrobin.conf
+{
+        "device":               "team0",
+        "runner":               {"name": "roundrobin"},
+        "ports":                {"enp0s9": {}, "enp0s10": {}}
+}
+# add slave interfaces
+nmcli connection add type team-slave con-name team0-port0 ifname enp0s9 master team0
+nmcli connection add type team-slave con-name team0-port1 ifname enp0s10 master team0</pre><p>Each slave interface needs to be configured with a seperate connection of type "team-slave".</p><p>The above works, but bringing team0 down and up again without a reboot does not work.  For some reason, when bringng team0 down, the devices it uses are disconnected. If you try to reconnect them first</p><pre class="literallayout">[root@rhce1 ~]# nmcli con down team0
+[root@rhce1 ~]# nmcli dev st
+DEVICE   TYPE      STATE         CONNECTION
+enp0s3   ethernet  connected     Wired connection 1
+enp0s8   ethernet  connected     hostonly
+enp0s10  ethernet  disconnected  --
+enp0s9   ethernet  disconnected  --
+lo       loopback  unmanaged     --
+[root@rhce1 ~]# nmcli dev connect enp0s9
+Error: Device activation failed: The device has no connections available.
+[root@rhce1 ~]# nmcli dev st
+DEVICE   TYPE      STATE         CONNECTION
+enp0s3   ethernet  connected     Wired connection 1
+enp0s8   ethernet  connected     hostonly
+enp0s10  ethernet  disconnected  --
+enp0s9   ethernet  unavailable   --
+lo       loopback  unmanaged     --
+[root@rhce1 ~]# nmcli dev connect enp0s10
+Device 'enp0s10' successfully activated with '1ad12cb7-767f-4886-b222-692560498b0d'.</pre><pre class="literallayout">[root@rhce1 ~]# nmcli con up team0
+Connection successfully activated (D-Bus active path: /org/freedesktop/NetworkManager/ActiveConnection/7)
+[root@rhce1 ~]# nmcli dev st
+DEVICE   TYPE      STATE        CONNECTION
+enp0s10  ethernet  connected    team0-port1
+enp0s3   ethernet  connected    Wired connection 1
+enp0s8   ethernet  connected    hostonly
+veteam0  team      connected    team0
+enp0s9   ethernet  unavailable  --
+lo       loopback  unmanaged    --</pre><p>You can activate team0 again, but with just one interface.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_teaming_with_traditional_ifcfg"></a>2.2. Teaming with traditional ifcfg</h3></div></div></div><p>The following traditional configuration works:</p><pre class="literallayout">[root@rhce1 network-scripts]# for i in ifcfg-enp0s* ifcfg-team0 ;do echo $i;echo ===========; cat $i;echo ;done
+ifcfg-enp0s10
+===========
+DEVICE="enp0s10"
+ONBOOT="yes"
+DEVICETYPE="TeamPort"
+TEAM_MASTER="team0"</pre><pre class="literallayout">ifcfg-enp0s9
+===========
+DEVICE="enp0s9"
+ONBOOT="yes"
+DEVICETYPE="TeamPort"
+TEAM_MASTER="team0"</pre><pre class="literallayout">ifcfg-team0
+===========
+TEAM_MASTER="team0"
+DEVICE="team0"
+DEVICETYPE="Team"
+ONBOOT="yes"
+BOOTPROTO=none
+TEAM_CONFIG='{"runner": {"name": "roundrobin"}}'
+IPADDR=10.23.23.77
+GATEWAY=10.23.23.1</pre><p>To active this, restart the networking service:</p><pre class="literallayout">systemctl restart network.service</pre></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="_ipv6"></a>3. IPv6</h2></div></div></div><p>You can activate ipv6 privacy extensions:</p><pre class="literallayout"># vim /etc/sysctl.conf
+# sysctl -p
+net.ipv6.conf.enp0s3.use_tempaddr = 2</pre><p>This will cause the autogenerated ipv6 address to be randomized and renewed every 24 hours.</p><p>You can disable ipv6 like this:</p><pre class="literallayout"># vim /etc/sysctl.conf
+# sysctl -p
+net.ipv6.conf.all.disable_ipv6=1
+net.ipv6.conf.default.disable_ipv6=1</pre><p>Question: what is the difference in /proc/sys/net/ipvX/conf/ between "all" and "default"?</p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="_routing"></a>4. Routing</h2></div></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_configure_static_routes_with_iproute_nonpersistent"></a>4.1. Configure static routes with iproute - nonpersistent</h3></div></div></div><p>Note: all route table manipulations with ip are lost after reboot.</p><p>Show routes:</p><pre class="literallayout">ip route</pre><p>Delete a route</p><pre class="literallayout">ip route del &lt;route&gt;</pre><p>Example:</p><pre class="literallayout">[root@rhce1 ~]# ip r
+default via 10.23.23.99 dev enp0s8  proto static  metric 1024
+10.0.2.0/24 dev enp0s3  proto kernel  scope link  src 10.0.2.15
+10.23.23.0/24 dev enp0s8  proto kernel  scope link  src 10.23.23.51
+10.23.23.0/24 dev veteam0  proto kernel  scope link  src 10.23.23.104
+[root@rhce1 ~]# ip r del 10.23.23.0/24 dev veteam0
+[root@rhce1 ~]# ip r
+default via 10.23.23.99 dev enp0s8  proto static  metric 1024
+10.0.2.0/24 dev enp0s3  proto kernel  scope link  src 10.0.2.15
+10.23.23.0/24 dev enp0s8  proto kernel  scope link  src 10.23.23.51</pre><p>You can add static route using following command:</p><pre class="literallayout">ip route add {NETWORK} via {IP} dev {DEVICE}</pre><p>Add a new default route:</p><pre class="literallayout">ip r add default via &lt;default gw&gt;</pre><p>Example:</p><pre class="literallayout">[root@rhce1 ~]# ip r add default via 10.0.2.2
+[root@rhce1 ~]# ip r
+default via 10.0.2.2 dev enp0s3
+10.0.2.0/24 dev enp0s3  proto kernel  scope link  src 10.0.2.15
+10.23.23.0/24 dev enp0s8  proto kernel  scope link  src 10.23.23.51
+10.23.23.0/24 dev veteam0  proto kernel  scope link  src 10.23.23.104</pre><p>In order to make this persistent, you would need to put this in the appropriate file in</p><pre class="literallayout">/etc/sysconfig/network-scripts/route-&lt;interface&gt;</pre><p>E.g.</p><pre class="literallayout">GATEWAY0=192.168.1.254
+NETMASK0=255.255.255.0
+ADDRESS0=192.168.55.0
+GATEWAY1=10.164.234.112
+NETMASK1= 255.255.255.240
+ADDRESS1=10.164.234.132</pre><p>The default gateway goes into</p><pre class="literallayout">/etc/sysconfig/network # parameter is called GATEWAY</pre></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_configuring_static_routes_with_nmcli_persistent"></a>4.2. Configuring static routes with nmcli - persistent</h3></div></div></div><p>To configure static routes using the nmcli tool, the interactive editor mode must be used:</p><pre class="literallayout">nmcli con edit &lt;con name&gt;</pre><pre class="literallayout">nmcli&gt; set ipv4.routes 192.168.122.0/24 10.10.10.1
+nmcli&gt;
+nmcli&gt; save persistent</pre><p>To set the default route with NetworkManager, make sure only that interface providing the
+default gateway can set this (from <a class="ulink" href="https://mail.gnome.org/archives/networkmanager-list/2014-July/msg00080.html" target="_top">https://mail.gnome.org/archives/networkmanager-list/2014-July/msg00080.html</a>):</p><p>NM automatically sets the default route based on two things:</p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem">
+interface priority - all interfaces have a priority and if two interfaces are active, and <span class="strong"><strong>not</strong></span> prevented from getting the default route (see #2), the one with the highest priority wins.  Right now, that’s a static ordering but we’re exploring how to make that dynamic.
+</li><li class="listitem">
+the "never-default" option: you can prevent connections (and thus their interface when that connection is active) from ever getting the default route by setting this option.
+</li></ol></div><p>With nmcli:</p><pre class="literallayout">nmcli c mod eth0 ipv4.never-default true
+nmcli c mod eth0 ipv6.never-default true</pre><p>would prevent connection "eth0" from ever receiving the IPv4 or IPv6
+default route.  This would allow some other connection/interface to
+receive the default route, when active.</p><p>Example:</p><pre class="literallayout">root@rhce1 ~]# nmcli con mod hostonly ipv4.never-default true
+[root@rhce1 ~]# ip r
+default via 10.23.23.99 dev enp0s8  proto static  metric 1024
+10.0.2.0/24 dev enp0s3  proto kernel  scope link  src 10.0.2.15
+10.23.23.0/24 dev enp0s8  proto kernel  scope link  src 10.23.23.51
+10.23.23.0/24 dev veteam0  proto kernel  scope link  src 10.23.23.104</pre><pre class="literallayout">root@rhce1 ~]# systemctl restart network.service</pre><pre class="literallayout">[root@rhce1 ~]# ip r
+default via 10.0.2.2 dev enp0s3  proto static  metric 1024
+10.0.2.0/24 dev enp0s3  proto kernel  scope link  src 10.0.2.15
+10.23.23.0/24 dev enp0s8  proto kernel  scope link  src 10.23.23.51
+10.23.23.0/24 dev veteam0  proto kernel  scope link  src 10.23.23.104</pre></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="_firewall_with_firewalld"></a>5. Firewall with firewalld</h2></div></div></div><p>Usefull resources are</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem">
+<a class="ulink" href="http://www.certdepot.net/rhel7-get-started-firewalld/" target="_top">certdepot.net</a>
+</li><li class="listitem">
+<a class="ulink" href="https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/7/html/Security_Guide/sec-Using_Firewalls.html" target="_top">Redhat</a>
+</li><li class="listitem">
+<a class="ulink" href="https://fedoraproject.org/wiki/FirewallD" target="_top">Fedora</a>
+</li></ul></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_general"></a>5.1. General</h3></div></div></div><p>The systemwide default zone is configured in</p><pre class="literallayout">/etc/firewalld/firewalld.conf</pre><p>and can be changed either with an editor, or with</p><pre class="literallayout">firewall-cmd --set-default-zone=&lt;desired default zone&gt;</pre></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_quest_create_a_custom_firewall_zone"></a>5.2. Quest: create a custom firewall zone</h3></div></div></div><p>The task we are persuing in order to learn about firewalld is to put team0 in an extra zone and</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem">
+block ssh
+</li><li class="listitem">
+allow http/ or port 1234
+</li><li class="listitem">
+for all clients / allow for only one client
+</li></ul></div><div class="note" style="margin-left: 0; margin-right: 10%;"><h3 class="title">Note</h3><p>When opening a nonstandard listener with nc, issue "setenforce 0" to put the server in permissive mode,
+otherwise SELinux will block access to the listener, as there is no policy allowing that listener.</p></div><p>Create a new zone by copying one of the standard zones, e.g.:</p><pre class="literallayout">[root@rhce1 ~]# cd /etc/firewalld/zones/
+[root@rhce1 zones]# cp /usr/lib/firewalld/zones/drop.xml team.xml
+[root@rhce1 zones]# vim team.xml
+[root@rhce1 zones]# cat team.xml
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;zone target="DROP"&gt;
+  &lt;short&gt;team&lt;/short&gt;
+  &lt;description&gt;Special Firewall zone for my team interface.&lt;/description&gt;
+&lt;/zone&gt;</pre><p>Now you could go on editing the xml file with an editor to add services, but this could also be done using firewall-cmd.
+First, we check the active zones:</p><pre class="literallayout">[root@rhce1 zones]# firewall-cmd --get-active-zones
+public
+  interfaces: enp0s3 enp0s8 enp0s9 veteam0</pre><p>Then, we add the device to the zone:</p><pre class="literallayout">[root@rhce1 ~]# nmcli connection modify team0 connection.zone team
+[root@rhce1 ~]# nmcli connection show team0 |grep zone
+connection.zone:                        team</pre><p>Verify with firewall-cmd that team0 was added to the zone team which is now active:</p><pre class="literallayout">[root@rhce1 zones]# firewall-cmd --get-active-zones
+public
+  interfaces: enp0s3 enp0s8 enp0s9
+team
+  interfaces: veteam0</pre><p>Now we need to add our custom port to the zone team. First the code, then the explanation:</p><pre class="literallayout">[root@rhce1 zones]# firewall-cmd --zone=team --list-ports
+[root@rhce1 zones]# firewall-cmd --zone=team --add-port=1234/tcp --permanent
+success
+[root@rhce1 zones]# firewall-cmd --zone=team --list-ports
+[root@rhce1 zones]# firewall-cmd --reload
+success
+[root@rhce1 zones]# firewall-cmd --zone=team --list-ports
+1234/tcp</pre><p>First we check the open ports of the zone "team" - no ports open. Then we add our custom port and make it permanent.
+The we check again - still no ports open. A reload is required to make the changes effective (without reboot).</p><p>Now with selinux in permissive mode, I start a custom listener like this:</p><pre class="literallayout">nc -l 1234</pre><p>Now I <span class="emphasis"><em>should</em></span> be able to connect form the outside to that port. I am not, the remainder of this section contains debugging trials.</p><p>I can not connect to that port from the outside (telnet 10.23.23.77 1234) with the firewall active.
+When I put team0 in the public zone and add the custom port, it somehow works:</p><pre class="literallayout">[root@rhce1 ~]# nmcli connection modify team0 connection.zone public
+[root@rhce1 zones]# firewall-cmd --zone=public --add-port=1234/udp --permanent
+success
+[root@rhce1 zones]# firewall-cmd --zone=public --add-port=1234/tcp --permanent
+success
+[root@rhce1 zones]# cat public.xml
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;zone&gt;
+  &lt;short&gt;Public&lt;/short&gt;
+  &lt;description&gt;For use in public areas. You do not trust the other computers on networks to not harm your computer. Only selected incoming connections are accepted.&lt;/description&gt;
+  &lt;service name="dhcpv6-client"/&gt;
+  &lt;service name="ssh"/&gt;
+  &lt;port protocol="tcp" port="1234"/&gt;
+  &lt;port protocol="udp" port="1234"/&gt;
+&lt;/zone&gt;
+[root@rhce1 zones]# firewall-cmd --reload
+success</pre><p>So there must be a subtle difference in the way the zones are configured. Maybe after removing the "DROP" from the
+team config, a complete firewall reload is needed:</p><pre class="literallayout">firewall-cmd --complete-reload</pre><p>No, that does not help either.</p><p>Also, ssh should be blocked for team0, but is not. It kind of looks like only the default zone is active, maybe because
+both interfaces have addresses in the same subnet.
+So next steps are to create another hostonly subnet, put team0 (or whatever interface) in that subnet and
+try the same exercise again.</p><p>Other try:
+ Query whether interface interface is bound to a zone.</p><pre class="literallayout">[root@rhce1 ~]# firewall-cmd --get-active-zones
+public
+  interfaces: enp0s3 enp0s8 enp0s9
+block
+  interfaces: veteam0
+  sources: 10.23.23.11
+[root@rhce1 ~]# man firewall-cmd
+[root@rhce1 ~]# firewall-cmd --zone=block --query-interface=veteam0
+yes
+[root@rhce1 ~]# firewall-cmd --zone=public --query-interface=enp0s9
+yes</pre><p>Still, it looks like the assignment to zones does not work, as connecting to port 22 always works, regardless of the zone the interface is in.</p><p>Further question:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem">
+Q: If I add a port to a zone, does that apply to incoming or outgoing traffic? A: It applys to incoming traffic (CHAIN INPUT), listed ports will be allowed.
+</li><li class="listitem">
+Q: If I add a source, does that exclude or include that source from traffic? A: If I add a source, all traffic from that source will be blocked.
+</li><li class="listitem">
+What are the defaults for new zones? Like drop/reject, etc.
+</li></ul></div><p>Answers:
+By default, all ports are blocked.
+Guesses: if I add a source, only this source will be allowed ports and services which defined for that zone.</p><p>Simpler Quest: create a network connection, which does not allow port 22.
+Adding interface enp0s10 to zone drop and reloading firewall does not block port 22. Obviously, I missed something.
+Strange enough, after sleep of laptop, now it works. Check again.</p><p>Also, play around with issuing the same command with and without "--permanent", to change both runtime and permanent configuration.
+Also, first dropping everything, then opening port 22 does not open port 22, but adding service ssh does. Check again. Maybe also wait a little.
+Also, try defining custom port as a service first (/usr/lib/firewalld/services)</p><p>Once again from start:</p><pre class="literallayout">[root@rhce1 ~]# firewall-cmd --get-active-zones
+drop
+  interfaces: enp0s10
+public
+  interfaces: enp0s3 enp0s8 veteam0
+[root@rhce1 ~]# firewall-cmd --zone=drop --list-all
+drop (active)
+  interfaces: enp0s10
+  sources:
+  services:
+  ports:
+  masquerade: no
+  forward-ports:
+  icmp-blocks:
+  rich rules:</pre><pre class="literallayout">&gt; Port 22 is blocked for enp0s10</pre><p>Now adding ssh:
+    [<a class="ulink" href="mailto:root@rhce1" target="_top">root@rhce1</a> ~]# firewall-cmd --zone=drop --list-all
+    drop (active)
+      interfaces: enp0s10
+      sources:
+      services: ssh
+      ports:
+      masquerade: no
+      forward-ports:
+      icmp-blocks:
+      rich rules:</p><pre class="literallayout">&gt; port 22 is still blocked</pre><p>And then sometimes, it just works. It seems this behaviour is highly undeterministic - there might be a bug. Either in the OS, or maybe
+the virtual box virtual network is messing with us.</p></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="_kernel_parameters"></a>6. Kernel parameters</h2></div></div></div><p>Nothing here yet.</p><p>TODO</p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="_authconfig"></a>7. authconfig</h2></div></div></div><p>Nothing here yet.</p><p>TODO</p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="_iscsi"></a>8. iscsi</h2></div></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_on_the_server"></a>8.1. On the server</h3></div></div></div><p>iscsi targets are managed with <code class="literal">targetcli</code> (contained in the package by the same name).
+In this example, we will add a second hard disk to our iscsi server ("target"), which
+is available under the name of <code class="literal">/dev/sdb</code>. The following sequence of commands is taken from the manpage of <code class="literal">targetcli</code>, where it is
+presented as a quick start, most of the explaning text is also copy/paste from the manpage (horray for manpages!).</p><p>First we must create a backstore, which is a store that "backs" whatever will be exported. Different types are available, among these are
+FILEIO (usually a local disk image file, but can also be used to create a buffered block device) and BLOCK (for serving a block device
+which is attached locally).</p><pre class="literallayout">backstores/block create my_disk /dev/sdb</pre><p>Create an iSCSI target with a default WWN. It will also create an initial target portal group called tpg1.</p><pre class="literallayout">iscsi/ create
+Created target iqn.2003-01.org.linux-iscsi.rhce2.x8664:sn.dcefd2a66602
+Created TPG 1.</pre><p>Add a portal, i.e. an IP address and TCP port via which the target can be contacted by initiators. Sane defaults are used if  these  are  not
+specified.</p><pre class="literallayout">cd iscsi/iqn.2003-01.org.linux-iscsi.rhce2.x8664:sn.dcefd2a66602/tpg1
+portals/ create</pre><p>Create ACLs - who can access the lun? First look up your iscsi ID on the client:</p><pre class="literallayout">[root@rhce1 ~]# cat /etc/iscsi/initiatorname.iscsi
+InitiatorName=iqn.1994-05.com.redhat:8445b9e15b84</pre><p>Then, back on the server:</p><pre class="literallayout">acls/ create iqn.1994-05.com.redhat:8445b9e15b84</pre><p>Create  a new LUN in the TPG, attached to the storage object that has previously been defined. The storage object now shows up under the /back‐
+stores configuration node as activated. Also, disable authentication, generate node acls (whatever that means …), and save the configuration:</p><pre class="literallayout">luns/ create /backstores/block/my_disk
+set attribute authentication=0
+set attribute generate_node_acls=1
+cd /
+saveconfig</pre><p>The last two steps are not really nessessary, if you just exit wit <code class="literal">exit</code> the config will also be saved.</p><p>In <code class="literal">targetcli</code>, you can always type <code class="literal">help</code> to get a list of commands to navigate. Using the tab key, you will be presented with a list
+of currently (that is, with respect to your current location in the config tree) available commands. It will also show possible
+options to commands that you have allready started typing - much like bash completion for e.g. nmcli.</p><p>In case you messed up your config, and want to start from scratch, you can use</p><pre class="literallayout">targetcli clearconfig confirm = true</pre><p>We will also need to open the corresponding firewall port</p><pre class="literallayout">firewall-cmd --add-port=3260/tcp
+firewall-cmd --add-port=3260/tcp --permanent
+firewall-cmd --reload</pre><p>If you forget about which ports are used by default, you can always look them up:</p><pre class="literallayout">[root@rhce2 ~]# grep iscsi-target /etc/services
+iscsi-target    3260/tcp                # iSCSI port
+iscsi-target    3260/udp                # iSCSI port</pre></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_on_the_client"></a>8.2. On the client</h3></div></div></div><p>First, install the client utilities:</p><pre class="literallayout">yum install iscsi-initiator-utils</pre><p>Then discover the targets with <code class="literal">iscsiadm</code> :</p><pre class="literallayout">[root@rhce1 ~]# man iscsiadm
+[root@rhce1 ~]# iscsiadm --mode discoverydb --type sendtargets --portal 10.23.23.52 --discover
+10.23.23.52:3260,1 iqn.2003-01.org.linux-iscsi.rhce2.x8664:sn.a0504e72987a</pre><p>The man command is shown as the whole command is listed in the man page, so no need to remeber all the options.
+Note that the ip address is resolved to rhce2 - it is important to have dns working. This can be via <code class="literal">/etc/hosts</code>.</p><p>Now we need to "login" to the target. The identifier used must be the one found by the previous discovery action.
+The exact syntax to login is written in the man page of <code class="literal">iscsiadm</code>.
+We use <code class="literal">lsblk</code> bevor and after the login to show that we have a new device:</p><pre class="literallayout">[root@rhce1 ~]# lsblk
+NAME                        MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+sda                           8:0    0    8G  0 disk
+  sda1                        8:1    0  500M  0 part /boot
+  sda2                        8:2    0  7.5G  0 part
+    centos_centosseven-swap 253:0    0  820M  0 lvm  [SWAP]
+    centos_centosseven-root 253:1    0  6.7G  0 lvm  /
+sr0                          11:0    1 55.6M  0 rom
+[root@rhce1 ~]# iscsiadm --mode node --targetname \
+    iqn.2003-01.org.linux-iscsi.rhce2.x8664:sn.a0504e72987a \
+    --portal 10.23.23.52:3260 --login
+Logging in to [iface: default, target: iqn.2003-01.org.linux-iscsi.rhce2.x8664:sn.a0504e72987a, portal: 10.23.23.52,3260] (multiple)
+Login to [iface: default, target: iqn.2003-01.org.linux-iscsi.rhce2.x8664:sn.a0504e72987a, portal: 10.23.23.52,3260] successful.
+[root@rhce1 ~]# lsblk
+NAME                        MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+sda                           8:0    0    8G  0 disk
+  sda1                        8:1    0  500M  0 part /boot
+  sda2                        8:2    0  7.5G  0 part
+    centos_centosseven-swap 253:0    0  820M  0 lvm  [SWAP]
+    centos_centosseven-root 253:1    0  6.7G  0 lvm  /
+sdb                           8:16   0    8G  0 disk
+sr0                          11:0    1 55.6M  0 rom</pre><p>Now we can use the new device <code class="literal">/dev/sdb</code> for whatever we want. If, after we created a filesystem, want to make the mount
+permanent, we must take care to add the option <code class="literal">_netdev</code> to <code class="literal">/etc/fstab</code>, which tells mount that this device requires
+working networking. So the mount is delayed untill the network is available.</p></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="_system_activity_accounting"></a>9. System Activity Accounting</h2></div></div></div><p>Various aspects of system activity (cpu, ram, device throughput, …) can be monitored with <code class="literal">sar</code>.
+<code class="literal">sar</code> collects the data and writes it to daily binary reports under <code class="literal">/var/log/sa/</code>.</p><p><code class="literal">sar</code> is contained in the <code class="literal">sysstat</code> package. Without any options, <code class="literal">sar</code> displays cpu activity. Consult the man page
+for the myriard of options available.</p><p>The frequency of measurement is controlled by the cronjob defined in <code class="literal">/etc/cron.d/sysstat</code>. Other parameters (e.g. how
+many files to keep) are stored in <code class="literal">/etc/sysconfig/sysstat</code>.</p><p>Another tool contained in the <code class="literal">sysstat</code> package is <code class="literal">iostat</code>. It can be called like this:</p><pre class="literallayout">iostat &lt;intervall lenth in seconds&gt; &lt;number of interfalls to display&gt;</pre><p>E.g.</p><pre class="literallayout">iostat 2 5</pre><p>Without the number of intervalls, new data is displayed for ever.</p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="_shell_scripting"></a>10. Shell scripting</h2></div></div></div><p>There are a lot of great resources on the web about shell scripting, so here I will
+only list bits and pieces that I was no aware of or did not know by heart.</p><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_special_variables"></a>10.1. Special Variables</h3></div></div></div><p>Some special variables
+    $*  -  all parameter in one string
+    $#  -  number of parameters given to a script or function</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_case"></a>10.2. Case</h3></div></div></div><p>A switch case construct is also available in bash, though I seldom use it:</p><pre class="literallayout">case $1 in
+    foo) echo You entered foo ;;
+    ba[rz]) echo You entered something starting with ba, then r or z. ;;
+    *) echo I do not recognize this ;;
+esac</pre><p>A point I was not aware of is the use of pathname expansion used in the cases.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_string_manipulation"></a>10.3. String manipulation</h3></div></div></div><p>All sorts of string manipulation can be done in bash. Check <code class="literal">man bash</code> for a comprehensive read. I was amazed to see what is
+possible.</p><p>Anyway, here are a few examples of string manipulation in bash:</p><pre class="literallayout">my_string="Hello World out there"
+echo "my_string=${my_string}"
+echo "Length of my_string is ${#my_string}"
+echo "Substring, starting at 3, 5 chars long: ${my_string:3:5}"
+echo "Matches are done according to the rules of filename expansion"
+echo "removing prefix up to match of o, lazy: ${my_string#*o}"
+echo "removing prefix up to match of o, greedy: ${my_string##*o}"
+echo "removing postfix from match of o, lazy: ${my_string%o*}"
+echo "removing postfix from match of o, greedy: ${my_string%%o*}"
+echo "search and replace: ${my_string/World/Folks}"</pre><p>There is more you can do with variables in bash, have a look at the man page, its pretty well written.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_loops"></a>10.4. Loops</h3></div></div></div><p>All sorts of loops are availabe. Of the usefull ones, this is the one I always forget about:</p><pre class="literallayout">while read i; do
+    echo $i
+done &lt; myfile.txt</pre><p>This reads the content of the file <code class="literal">myfile.txt</code> line by line.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_miscellaneous"></a>10.5. Miscellaneous</h3></div></div></div><p>Date calculations relative to the current date can be done like this:</p><pre class="literallayout">date -d "+12 weeks + 2 hours + 23 minutes"</pre><p>Write to stderr:</p><pre class="literallayout">echo This is an Error &gt;&amp;2</pre><p>You can create a temporary file or directory with <code class="literal">mktemp</code>. This could be usefull if you need a temporary file with a uniq name - <code class="literal">mktemp</code> will
+take care of this:</p><pre class="literallayout">[root@rhce1 ~]# x=$(mktemp /tmp/foobar.XXXX)
+[root@rhce1 ~]# echo $x
+/tmp/foobar.ZlZq
+[root@rhce1 ~]# echo Hi &gt;$x
+[root@rhce1 ~]# cat $x
+Hi</pre><p>Get a (pseude) random number:</p><pre class="literallayout">echo $RANDOM</pre><p>Thats all, folks.</p></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="_installing_software"></a>11. Installing Software</h2></div></div></div><p>Software is installed using yum. It might be worth installing <code class="literal">yum-utils</code>, which
+enhances yums capablities.</p><p>If you would like to have a persistent cache of the metadata, you can tell yum to
+keep the cache by setting</p><pre class="literallayout">keepcache=1</pre><p>in <code class="literal">/etc/yum.conf</code>. After that you should clean and rebuild the cache:</p><pre class="literallayout">yum clean all
+yum makecache</pre><p>Then you might want to have a cron job which keeps your cache up to date (e.g. <code class="literal">yum-updatesd</code>).</p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="_selinux"></a>12. SELinux</h2></div></div></div><p>To manage various aspects of SELinux, a tool called <code class="literal">semanage</code> is needed. It is not installed by default, even though SELinux
+is active by default. I did not know which package contained <code class="literal">semanage</code>, so I asked yum:</p><pre class="literallayout">yum whatprovides semanage
+yum install policycoreutils-python selinux-policy-devel</pre><p>The second package is need for the manpages - this is something which you need to <span class="strong"><strong>remember by heart</strong></span>.</p><p>Various resources like files, directories, network ports (!) and processes have labels, which control which object can access
+which resource (or in which way). Each label has four components:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem">
+user component (usually ends with _u)
+</li><li class="listitem">
+role component (usually ends with _r)
+</li><li class="listitem">
+type component (usually ends with _t)
+</li><li class="listitem">
+multi level security (MLS) component.
+</li></ul></div><p>I will not go into detail here, as it can become almost arbitrarly complex. The kernel manages the enforcement of the rules.</p><p>If you copy a file, it will inherit its new label from its parent directory. If you move a file, it will keep its label, and
+you will probably need to run <code class="literal">restorecon</code> to apply the proper label to it.</p><p>The rules guiding the labeling are stored in txt files underneath <code class="literal">/etc/selinux/targeted/contexts/</code>.
+As you install new software with yum, these files will be  updated.</p><p>To easily search for labels containing certain strings, you can use <code class="literal">semanage</code> (also ports):</p><pre class="literallayout">[root@rhce1 ~]# semanage port --list |grep ssh
+ssh_port_t                     tcp      22
+[root@rhce1 ~]# semanage fcontext --list |grep ssh
+/etc/rc\.d/init\.d/sshd                            regular file       system_u:object_r:sshd_initrc_exec_t:s0
+/etc/ssh/primes                                    regular file       system_u:object_r:sshd_key_t:s0
+/etc/ssh/ssh_host.*_key                            regular file       system_u:object_r:sshd_key_t:s0
+[...]</pre><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_policys"></a>12.1. Policys</h3></div></div></div><p>The default policy is "strict", which means everything is denied except for explicitly allowed actions. This seems to be not
+so managebale in practise. Therefore, usually a "targeted" policy is used. This only restricts a few components, and allows the rest.
+In the "targeted" policy, only the type component of the label is checked.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_booleans"></a>12.2. Booleans</h3></div></div></div><p>Certain settings of a policy are controlled by booleans, which can be toggeled at runtime. A list of available booleans can be viewed with</p><pre class="literallayout">getsebool -a</pre><p>To set a boolean, use</p><pre class="literallayout">setsebool -P &lt;boolname&gt; &lt;value&gt;</pre><p>The <code class="literal">-P</code> option makes the change permanent, without it the change in bool setting will not survive a reboot.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_audit"></a>12.3. Audit</h3></div></div></div><p>Policy violations (and also success) are logged in <code class="literal">/var/log/audit/audit.log</code>. So if something does not work, you can check
+there. In principal, everything is said there, but it is not the most human frindly format, there a tool has been defeloped,
+which can translate:</p><pre class="literallayout">audit2why &lt;/var/log/audit/audit.log</pre><p>If you do not want to see the whole log, you can extract the line in question to a different file and pipe that to <code class="literal">audit2why</code>.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_selinux_in_practise"></a>12.4. SELinux in practise</h3></div></div></div><p>If SELinux denies access to a file because of the wrong context (e.g. you have moved your .ssh/authorized_keys from somewhere else instead of
+creating it in place), you can restore the defined file context with <code class="literal">restorecon</code>:</p><pre class="literallayout">restorecon -rv /home/isaac/.ssh</pre><p>This of course relies on files being in their standard location. In practise this is not always the case. E.g. you might have your http
+doc root not in <code class="literal">/var/www/html</code>, but in <code class="literal">/opt/www/htmp</code>. <code class="literal">restorecon</code> won’t help much here, since it has no context for <code class="literal">/opt/www</code>
+yet. But you can create that context with <code class="literal">semanage</code> ( <code class="literal">man semanage-fcontext</code>), provided you know which context you want. For this it is
+helpfull to create a file in the standard location and check which context gets applied to this file. In this case, it would be
+<code class="literal">httpd_sys_content_t</code>.</p><pre class="literallayout">semanage fcontext -a -t httpd_sys_content_t "/opt/www(/.*)?"</pre><p>This specific regualr expression is important, and it should be explained(???). The manpage for this particular subcommand
+can be read with <code class="literal">man semanage-fcontext</code></p><p>A different approach is to take an existing directory with the correct context and use that as a template:</p><pre class="literallayout">semanage fcontext -a -e /var/www/html /opt/www/html</pre><p>Both add new file context rules, which can then be applied with</p><pre class="literallayout">restorecon -rv /opt/www/html</pre><p>Example:</p><pre class="literallayout">[root@rhce1 html]# ls -lZ
+-rw-r--r--. root root unconfined_u:object_r:user_tmp_t:s0 index.html
+[root@rhce1 html]# semanage fcontext -a -e /var/www/html /opt/www/html
+[root@rhce1 html]# restorecon -rv /opt/www/html/
+restorecon reset /opt/www/html context unconfined_u:object_r:usr_t:s0-&gt;unconfined_u:object_r:httpd_sys_content_t:s0
+restorecon reset /opt/www/html/index.html context unconfined_u:object_r:user_tmp_t:s0-&gt;unconfined_u:object_r:httpd_sys_content_t:s0
+[root@rhce1 html]# ls -lZ
+-rw-r--r--. root root unconfined_u:object_r:httpd_sys_content_t:s0 index.html</pre><p>If you want to run your service on a non-standard port, you need to add a suitable label to that port:</p><pre class="literallayout">semanage port -a -t http_port_t -p tcp 8080</pre><p>This labels tcp port 8080 for use by httpd.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_create_your_own_selinux_module"></a>12.5. Create your own SELinux module</h3></div></div></div><p>If there is no suitable file or port context for your needs, you can create your own packge, using <code class="literal">audit2allow</code>.</p><pre class="literallayout">audit2allow --input=myaudit.log --module-package=myaudit
+semange --install myaudit.pp</pre><p><code class="literal">audit2allow</code> will create a clear text file with .te ending, and a binary module with .pp ending. The binary can be installed with
+semanage. Note that the <code class="literal">-i|--install</code> option is not documented in the manpages.</p><p>EXERCISE: do this httpd with custom doc root</p></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="_apache_httpd"></a>13. Apache httpd</h2></div></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_basic_virtual_hosts"></a>13.1. Basic virtual hosts</h3></div></div></div><p>An example for a basic virtual host config is given in <code class="literal">/usr/share/doc/httpd-2.4.6/httpd-vhosts.conf</code>:</p><pre class="literallayout">&lt;VirtualHost *:@@Port@@&gt;
+    ServerAdmin webmaster@dummy-host.example.com
+    DocumentRoot "@@ServerRoot@@/docs/dummy-host.example.com"
+    ServerName dummy-host.example.com
+    ServerAlias www.dummy-host.example.com
+    ErrorLog "/var/log/httpd/dummy-host.example.com-error_log"
+    CustomLog "/var/log/httpd/dummy-host.example.com-access_log" common
+&lt;/VirtualHost&gt;</pre><p>Note that <code class="literal">@@Port@@</code> should be replaced with the actual port httpd is listening on, usually 80 or 443.
+These configuration lines should be placed in a file in <code class="literal">/etc/httpd/conf.d</code> with the ending <code class="literal">.conf</code>.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_https"></a>13.2. https</h3></div></div></div><p>Installing <code class="literal">mod_ssl</code> also adds a default ssl config, which uses the self signed certificats which are
+already present on the server. These can be found in <code class="literal">/etc/pki/tls/certs</code>.</p><p>https works out of the box, installing mod_ssl also puts a default
+<code class="literal">/etc/httpd/conf.d/ssl.conf</code> ssl config on your system.
+It is heavly documented, so probably no need to learn much by heart.
+ But if you want to customize your installation, e.g. with your own
+certificate, the following options could be helpfull:</p><pre class="literallayout">SSLEngine on
+SSLProtocol All -SSLv2 -SSLv3
+SSLCipherSuite "EECDH+ECDSA+AESGCM EECDH+aRSA+AESGCM EECDH+ECDSA+SHA384 EECDH+ECDSA+SHA256 EECDH+aRSA+SHA384 EECDH+aRSA+SHA256 EECDH+aRSA+RC4 EECDH EDH +aRSA RC4 !aNULL !eNULL !LOW !3DES !MD5 !EXP !PSK !SRP !DSS"
+SSLHonorCipherOrder on
+SSLCertificateFile /etc/pki/tls/certs/mycrt.crt
+SSLCertificateKeyFile /etc/pki/tls/private/mycrt.key
+SSLCertificateChainFile /etc/pki/tls/certs/myca.crt</pre><p>Note that we are disableing SSLv2 and SSLv3, as these have been shown to be vulnerable by the poodle attack.</p><p>The complete apache manual is available as the <code class="literal">httpd-manual</code> package, which will install all of the official apache docs
+in <code class="literal">/usr/share/httpd/manual</code>. Theses are html files, so its probably nicer to view them with a browser.
+It contains all the possible configuration options.</p><p>If you want to automatically rewrite all http traffic to https, use the following directive:</p><pre class="literallayout">RewriteEngine on
+RewriteRule ^(/.*)$ https://%{HTTP_HOST}$1 [redirect=301]</pre><p>It looks daunting to learn this by heart, but with a little understanding of regular expressions,
+ it is not that hard:
+First we look at the url (e.g. www.example.com/foo/bar )
+from the beginning (<code class="literal">^</code>) to the end (<code class="literal">$</code>). We want to extract the part after the hostname, which starts
+with a slash <code class="literal">/</code>. Everything behind that is matched with <code class="literal">.*</code> (<code class="literal">.</code> matches any character, and <code class="literal">*</code> matches
+any number of charachters). Since we want to insert the matched part in the rewrite again, we need to
+enclose it in brackets <code class="literal">(/.*)</code> (this is called "numbered backreference").</p><p>So that is the matching of incomming url. The next part is what the incomming url is rewritten to. It starts
+with <code class="literal">https://</code>, since the whole point of the exercise is to rewrite all traffic to https. Then comes the host
+name (obvious), and the comes <code class="literal">$1</code>, which is a reference to the machted expression from the incomming url.
+That is the expression matched previously within the brackets. In our example this is <code class="literal">/foo/bar</code>.</p><p>The last part is the http status message that the server sends to the client, in this case <code class="literal">[redirect=301]</code>.</p><p>If you insert this line in e.g. in your virtual host block for http traffic, all will be redirected to https.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_apache_and_php"></a>13.3. apache and php</h3></div></div></div><p>To make apache able to run php script, you need to install the <code class="literal">php</code> package.
+Then you can have php commands in side the following tag:</p><pre class="literallayout">&lt;?php
+    //php command, e.g.
+    phpinfo();
+?&gt;</pre><p>This must be inside a file with an <code class="literal">.php</code> extension. The rest of the file can still contain html.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_apache_and_python"></a>13.4. apache and python</h3></div></div></div><p>To make apache execute python scripts, install <code class="literal">mod_wsgi</code>. That is almost enough to remember, the rest is in the docs that come along
+with the package. To find the docs, do something like</p><pre class="literallayout">grep -Ri wsgi /usr/share</pre><p>This will turn up <code class="literal">/usr/share/doc/mod_wsgi-3.4/README</code>, which contains everything needed for a basic setup. It boils down to the following:</p><p>Inside your virtualhost directive, add this line to tell apache what to do with a certain url:</p><pre class="literallayout">WSGIScriptAlias /py /usr/local/apache/mypy.py</pre><p>Note that the python script resides outsite of the normal DocumentRoot. This is on purpose, as it might enable others to download
+the script itself if it would reside inside the doc root. But this also means that the script needs to be accessible and executable
+by the apache user. And because we have not set any specific restrictions on that dir yet, apache will deny everything, so we will need
+to allow access:</p><pre class="literallayout">&lt;Directory "/usr/local/apache"&gt;
+        Require all granted
+&lt;/Directory&gt;</pre><p>Next is to deploy a valid wsgi application. The README also provides a working example, which can be copied:</p><pre class="literallayout">def application(environ, start_response):
+    status = '200 OK'
+    output = 'Hello World!'
+    response_headers = [('Content-type', 'text/plain'),
+                        ('Content-Length', str(len(output)))]
+    start_response(status, response_headers)
+    return [output]</pre><p>The important part is that it contains a function by the name of <span class="emphasis"><em>application</em></span>.</p></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="_dns"></a>14. DNS</h2></div></div></div><p>There are two packages for doing DNS that will be examined here: bind and unbound.</p><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_caching_only_name_server_with_bind"></a>14.1. Caching only name server with bind</h3></div></div></div><p>bind is configured via <code class="literal">/etc/named.conf</code>. <code class="literal">named</code> is also the name of the service. Details about the config can
+be found with <code class="literal">man named.conf</code>. Also, the default config file lists quite a few options. For a caching name server,
+the following directives are needed:</p><pre class="literallayout">listen-on port 53 {any;};   // any could also be a semicolon seperated list of ip addresses
+allow-query {localhost; 10.23.23.0/24 };
+recursion yes;
+forward only;
+forwarders {8.8.8.8; };</pre><p>So here we define a DNS server that allows recursion ( which makes sense since it is caching only), and that forwards requests.
+A list of DNS servers is defined which the queries are forwarded to (<code class="literal">forwarders</code>), we listen on port 53 on all interfaces,
+and allow queries from localhost and the <code class="literal">10.23.23.0/24</code> subnet. If everyone should be able to access the server, then the
+<code class="literal">allow-query</code> directive can be ommited.</p><p>Now bevor starting the servic,e we can check the config for syntax errors:</p><pre class="literallayout">named-checkconf</pre><p>If that did not show any errors, we can start named.</p><p>You can get an answer from a specific server e.g. like this:</p><pre class="literallayout">dig @localhost www.google.com</pre></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_caching_only_name_server_with_unbound"></a>14.2. Caching only name server with unbound</h3></div></div></div><p>unbound is configured via <code class="literal">/etc/unbound/unbound.conf</code>. The default file is commented, so lots of options are already explained there.
+A minimal caching only nameserer would be configured like this:</p><pre class="literallayout">server:
+        interface: 0.0.0.0
+        access-control: 10.23.23.0/24 allow
+        domain-insecure: "example.com"
+remote-control:
+        control-enable: yes
+forward-zone:
+        name: "."
+        forward-host: 8.8.8.8</pre><p>The option <code class="literal">domain-insecure</code> specifies domains where validation should be ommited. This might be interesting for local zones.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_dns_troubleshooting"></a>14.3. DNS-Troubleshooting</h3></div></div></div><p>Maybe the best tool for dns troubleshooting is <code class="literal">dig</code> (check <code class="literal">yum whatprovices dig</code> for the package it is included with).</p><p>The order in which dns queries are done (local, dns server, …) is defined in <code class="literal">/etc/nsswitch</code>, in the line that starts
+with <code class="literal">hosts</code>. In order to check if your system is ok, you can compare the output of</p><pre class="literallayout">dig @yournameserver www.google.com
+getent hosts www.google.de</pre><p><code class="literal">getent</code> respects <code class="literal">/etc/nsswitch</code>, so a difference in the output could hint to a problem with the local system.</p><p>You could also force dig to use tcp (if udp is somehow blocked):</p><pre class="literallayout">dig +tcp www.google.com</pre></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="_nfs"></a>15. NFS</h2></div></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_setting_up_a_kerberos_server"></a>15.1. Setting up a kerberos server</h3></div></div></div><p>One of the requirements for the RHCE is to authenticate various services using kerberos.
+Setting up a kerberos server itself is not part of the exam, but for preparational
+purposes, I set one up using the following guide:
+<a class="ulink" href="https://gist.github.com/ashrithr/4767927948eca70845db" target="_top">https://gist.github.com/ashrithr/4767927948eca70845db</a> [kerberos basic setup].</p><p>I had to do a few things which are not mentioned in the original guide. Most of
+them are probably obvious, but I still mention them here for completness.</p><p>Add the kerberos service to the firewall:</p><pre class="literallayout">[root@rhce2 services]# firewall-cmd --permanent --add-service=kerberos
+success
+[root@rhce2 ~]# firewall-cmd --reload
+success</pre><p>Define a new service for the kerberos admin service (see also <a class="ulink" href="http://b.minwi.com/2014/09/11/define-a-new-service-in-firewalld/" target="_top">http://b.minwi.com/2014/09/11/define-a-new-service-in-firewalld/</a>):</p><pre class="literallayout">[root@rhce2 services]# cat /etc/firewalld/services/kerberos-adm.xml
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;service&gt;
+  &lt;short&gt;Kerberos-adm&lt;/short&gt;
+  &lt;description&gt;Kerberos-adm network authentication protocol server&lt;/description&gt;
+  &lt;port protocol="tcp" port="749"/&gt;
+  &lt;port protocol="udp" port="749"/&gt;
+&lt;/service&gt;</pre><p>Not the port 749. Then add that service to the firewall:</p><pre class="literallayout">[root@rhce2 services]# firewall-cmd --permanent --add-service=kerberos-adm
+success
+[root@rhce2 services]# firewall-cmd --reload
+success</pre><p>Also there is a typo, the command to add a principal on the client should be</p><pre class="literallayout">addprinc -randkey host/client.example.com</pre></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_exporting_directories_ro_and_rw_with_no_auth"></a>15.2. Exporting directories ro and rw with no auth</h3></div></div></div><p>Exporting a direcorty without authentication (only IP address of client is checked if desired) is rather simple. Install
+<code class="literal">nfs-utils</code>, start and enable the <code class="literal">nfs</code> service, and add it to the firewall.</p><p>A simple <code class="literal">/etc/exports</code> could look like this</p><pre class="literallayout">/export *(ro)</pre><p>This allows everybody to mount <code class="literal">/export</code> read only. If the <code class="literal">*</code> is replaced with an IP-address, or a subnet, then
+only clients with this adress or from this subnet can mount.</p><p>In order to export a directory writable, you have two possibilities:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem">
+make the exported dir owned by <code class="literal">nfsnobody</code> (and use <code class="literal">root_squash</code> as an option for the export)
+</li><li class="listitem">
+make the exported dir owned and mounted by root, and use the option <code class="literal">no_root_squahs</code>.
+</li></ul></div><p>Because the latter has some security implications, I would use the former. The option <code class="literal">root_squash</code> maps files which would
+belong to the root user on a client to the user "nfsnobody".</p><p>In order to make changes to <code class="literal">/etc/fstab</code> visible to the server, it is not nessessary to restart the server, a simple</p><pre class="literallayout">exportfs -r</pre><p>will do.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_kerberizing_nfs"></a>15.3. Kerberizing NFS</h3></div></div></div><p>Check <a class="ulink" href="http://www.certdepot.net/rhel7-use-kerberos-control-access-nfs-network-shares/" target="_top">http://www.certdepot.net/rhel7-use-kerberos-control-access-nfs-network-shares/</a> .</p><p>TODO</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_general_nfs_options"></a>15.4. General NFS Options</h3></div></div></div><p>Here are some general NFS Options:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem">
+<code class="literal">ro</code> read only
+</li><li class="listitem">
+<code class="literal">rw</code> read write
+</li><li class="listitem">
+<code class="literal">sync</code> make sure all writes are synchronized to disk bevor acknowledging a successfull write. This improves data security, but costs (quite a lot of) performance
+</li><li class="listitem">
+<code class="literal">root_squash</code> All files created on the client by root will have its ownership mapped to a less privileged user. This is the default. The opposite would be <code class="literal">no_root_squash</code>, which is less advisable from a security point of view.
+</li><li class="listitem">
+<code class="literal">insecure</code> client requests are allowed to come from an unprivileged port (meaning normal users can mount). The default is the oposite, which is <code class="literal">secure</code>.
+</li><li class="listitem">
+<code class="literal">nohide</code> Show mounted directories inside the export. The default is <code class="literal">hide</code>.
+</li></ul></div></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="_samba"></a>16. Samba</h2></div></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_basics"></a>16.1. Basics</h3></div></div></div><p>Install the samba server by installing the packages <code class="literal">samba</code> and <code class="literal">samba-client</code>. This gives you a well documented
+<code class="literal">/etc/samba/smb.conf</code>.</p><p>By default, it exports homedirs and printers. Make sure to read the section about SELinux at the top of the default
+configuratin file. Then enable samba in the firewall, start the service and enable home dir sharing in SELinux:</p><pre class="literallayout">[root@rhce2 ~]# vim /etc/samba/smb.conf
+[root@rhce2 ~]# firewall-cmd --permanent --add-service=samba
+success
+[root@rhce2 ~]# firewall-cmd --reload
+success
+[root@rhce2 ~]# systemctl start smb
+[root@rhce2 ~]# setsebool -P samba_enable_home_dirs on</pre><p>If you want to export a different direcory, you could for example use the provided <code class="literal">[public]</code> share:</p><pre class="literallayout"># A publicly accessible directory that is read only, except for users in the
+# "staff" group (which have write permissions):
+        [public]
+        comment = Public Stuff
+        path = /home/samba
+        public = yes
+        writable = yes
+        printable = no
+        write list = +staff</pre><p><span class="strong"><strong>Note that the samba users - which are mapped to system users - need to have permissions on the directories that we want to export.</strong></span>
+So if I have a systemuser <code class="literal">isaac</code>, I need to add that user also to samba (<code class="literal">smbpasswd -a isaac</code>), and then give read (and write)
+permission to isaac on the exported dir. This can be acomplished in different kinds of ways, either through classic filesystem
+permissions, or with ACLs, which is much more flexible and probably what you want in this case.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_mounting_a_samba_share_on_a_client"></a>16.2. Mounting a samba share on a client</h3></div></div></div><p>To mount a samba share on an client, you issue something like this:</p><pre class="literallayout">mount -t cifs //10.23.23.52/public /mnt/smb/ -o username=isaac,password=xxxxx</pre><p>Note that this requires the package <code class="literal">cifs_utils</code> (it provides mount.cifs). Also note that the syntax for
+specfying a share is</p><pre class="literallayout">//&lt;hostname or IP&gt;/&lt;share name&gt;</pre><p>where <code class="literal">&lt;share name&gt;</code> is NOT the path on the server, but the name of the share, as specified in square brackets, see above.</p><p>If you want to mount remote samba shares as homedirs, you need to toggle the following SELinux boolean:</p><pre class="literallayout">setsebool -P use_samba_home_dirsi=on</pre><p>This is not to be confused with <code class="literal">samba_enable_home_dirs</code>, which controls the exporting of homedrs.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_tools"></a>16.3. Tools</h3></div></div></div><p>You can get a listing of all samba users with</p><pre class="literallayout">pdbedit --list</pre><p>There is a tool to edit the samba passwords:</p><pre class="literallayout">smbpasswd -a &lt;username&gt;</pre><p>This will add a user to the local samba passwd file.</p></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="_postfix"></a>17. Postfix</h2></div></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_master_cf"></a>17.1. master.cf</h3></div></div></div><p>After installing the postfix package, you can find some default configuration files in <code class="literal">/etc/postfix</code>.
+There is the <code class="literal">master.cf</code>, which controls the master process. For the scope of
+what is expected for RHCE, I expect no modifications are needed to be made there.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_main_cf"></a>17.2. main.cf</h3></div></div></div><p>And then there is the <code class="literal">main.cf</code>, where
+most of the configuration occurs. By default, the system can relay from local recepients to local
+recepients.</p><p>You need to make sure the hostname is set correctly, with fqdn. If you want to relay mails from your
+local network, check the following two parameters:</p><pre class="literallayout">mynetworks = 10.23.23.0/24, 127.0.0.1 # usually the default
+inet_interfaces = all</pre><p><code class="literal">mynetworks</code> specifies a range of hosts, which are trusted automatically, which means that mails from
+them will be accepted without any further checks.</p><p><code class="literal">inet_interfaces</code> specifies on which interfaces to listen to.</p><p>There are other parameters that need to be set, but most of them have good defaults, and in order to
+do local mail delivery, everything is already set up.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_mailrelay"></a>17.3. Mailrelay</h3></div></div></div><p>If postfix is not only to deliver to local mailboxes, but forward mails that it can not deliver localy, a mail realy needs
+to be configured. This is done in <code class="literal">main.cf</code> with the parameter</p><pre class="literallayout">relayhost = rhce1.acme.ch
+mydestination = $myhostname, localhost.$mydomain, localhost, $mydomain</pre><p>for example. After reloading postix, all mail that can not be delivered locally will be forwarded to relayhost.
+Note that <code class="literal">mydestination</code> needed the appendix of <code class="literal">$mydomain</code>, otherwise postfix would not accept
+mails for other hosts in my domain.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_aliases"></a>17.4. Aliases</h3></div></div></div><p>Basic alias configuration is done in</p><pre class="literallayout">/etc/aliases</pre><p>which is a simple text file. It defines aliases for local mail delivery. Check the contents of the file - it is already populated with
+defaults. After you make changes to this file, it is important to issue</p><pre class="literallayout">newaliases</pre><p>which reads the textfile and transforms it into a binary format (<code class="literal">/etc/aliases.db</code>),
+which will then be read by postfix. This does not require a restart
+of the postfix daemon.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_tools_2"></a>17.5. Tools</h3></div></div></div><p>To check the actual setting of a parameter, it is helpfull to use the <code class="literal">postconf</code> utility, which by
+default displays all parameters and their current setting. For example, to view the current <code class="literal">mynetworks</code> setting,
+type</p><pre class="literallayout">postconf |grep mynetworks</pre><p>In order to do basic testing, it can be helpfull to know the basic smtp commands. Connect to port 25 of your mail
+relay, then issue</p><pre class="literallayout">root@rhce1 ~]# telnet rhce2 25
+Trying 10.23.23.52...
+Connected to rhce2.
+Escape character is '^]'.
+220 rhce2.acme.ch ESMTP Postfix
+HELO rhce1.acme.ch
+250 rhce2.acme.ch
+MAIL FROM:isaac@acme.ch
+250 2.1.0 Ok
+RCPT TO:root@rhce2.acme.ch
+250 2.1.5 Ok
+DATA
+354 End data with &lt;CR&gt;&lt;LF&gt;.&lt;CR&gt;&lt;LF&gt;
+Hello root,</pre><pre class="literallayout">how do you do?</pre><pre class="literallayout">yours,
+Isaac
+.
+250 2.0.0 Ok: queued as AE62E90CAF8</pre><p>The basic commands to remember are:</p><pre class="literallayout">HELO &lt;fqdn local host&gt;
+MAIL FROM:&lt;sender mail address&gt;
+RCPT TO:&lt;recipient mail address&gt;
+DATA
+. # finish with period, followed by a blank line.</pre><p>Each command is answered with a status code. 250 means "OK", 354 means "Start mail input; end with &lt;CRLF&gt;.&lt;CRLF&gt;".
+Then, on rhce2, we are informed that mail was received:</p><pre class="literallayout">[root@rhce2 ~]#
+You have mail in /var/spool/mail/root
+[root@rhce2 ~]# cat /var/spool/mail/root
+From isaac@acme.ch  Wed Mar  4 01:06:38 2015
+Return-Path: &lt;isaac@acme.ch&gt;
+X-Original-To: root@rhce2.acme.ch
+Delivered-To: root@rhce2.acme.ch
+Received: from rhce1.acme.ch (rhce1 [10.23.23.51])
+        by rhce2.acme.ch (Postfix) with SMTP id AE62E90CAF8
+        for &lt;root@rhce2.acme.ch&gt;; Wed,  4 Mar 2015 01:05:54 -0500 (EST)</pre><pre class="literallayout">Hello root,</pre><pre class="literallayout">how do you do?</pre><pre class="literallayout">yours,
+Isaac</pre><p>So things are working. If not, check <code class="literal">/var/log/maillog</code>. Each mail gets its uniq ID, which is the last part of the conversation of
+the mta with the client (<code class="literal">250 2.0.0 Ok: queued as AE62E90CAF8</code>). We can grep for that ID to see what happend with that email:</p><pre class="literallayout">[root@rhce2 ~]# grep AE62E90CAF8 /var/log/maillog
+Mar  4 01:06:18 rhce2 postfix/smtpd[2734]: AE62E90CAF8: client=rhce1[10.23.23.51]
+Mar  4 01:06:38 rhce2 postfix/cleanup[2737]: AE62E90CAF8: message-id=&lt;&gt;
+Mar  4 01:06:38 rhce2 postfix/qmgr[2705]: AE62E90CAF8: from=&lt;isaac@acme.ch&gt;, size=227, nrcpt=1 (queue active)
+Mar  4 01:06:38 rhce2 postfix/local[2738]: AE62E90CAF8: to=&lt;root@rhce2.acme.ch&gt;, relay=local, delay=44, delays=44/0.04/0/0.01, dsn=2.0.0, status=sent (delivered to mailbox)
+Mar  4 01:06:38 rhce2 postfix/qmgr[2705]: AE62E90CAF8: removed
+[root@rhce2 ~]#</pre><p>In this case we see that themail was queued and delivered to mailbox.</p></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="_ssh"></a>18. SSH</h2></div></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_keys"></a>18.1. Keys</h3></div></div></div><p>Keys are generated with <code class="literal">ssh-keygen</code>. It has a parameter to specify the "strength" in bytes:</p><pre class="literallayout">ssh-keygen -b 4096</pre><p>The default for RHEL 7 /Centos 7 is 2048 for RSA keys. RSA keys are the default.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_various"></a>18.2. Various</h3></div></div></div><p>All sorts of other things can be done with the ssh client and server. Extensive documentation can be found in the man pages:</p><pre class="literallayout">man sshd_config # server
+man ssh_config # client</pre></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="_ntp"></a>19. NTP</h2></div></div></div><p>There are two tools to synchronize time over network: the classic ntp, and the new chrony.</p><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_ntpdate_and_ntpd"></a>19.1. ntpdate and ntpd</h3></div></div></div><p>If you want to manually synchronize the time, you can issue something like</p><pre class="literallayout">ntpdate time.server.org</pre><p>where <code class="literal">time.server.org</code> should be replaced with the fqdn of a real time server.
+You can also start the service <code class="literal">ntpd</code>, which will then periodically synchronize time.
+The downside of this is that ntpd can not correct bigger time differences.</p><p>Time servers for ntpd are configured in <code class="literal">/etc/ntp.conf</code>, where a lot of examples
+are configured, so the syntax should be clear.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_chrony"></a>19.2. chrony</h3></div></div></div><p>The newer chrony, part of systemd, is configured via <code class="literal">/etc/chrony.conf</code>. There you
+can define your time servers, the syntax is similar to ntpd - check the file for
+examples.</p><p>chrony runs as a service called chronyd.</p></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="_maria_db"></a>20. Maria DB</h2></div></div></div><p>After installing <code class="literal">mariadb-server</code>, start the service <code class="literal">mariadb</code>, and enable it it the firewall.
+In the firewall it is called <code class="literal">mysql</code>, because Maria DB is a fork of MySQL.</p><p>You can connect to the database locally with</p><pre class="literallayout">mysql -u root</pre><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_securing_the_root_account"></a>20.1. Securing the root Account</h3></div></div></div><p>The default installatin does not have a password for the local root user. For security reasons,
+this should be changed. Also, there is more then one root account - accounts have not only
+a username, but also a hostpart from where the user connects, so e.g. root@<span class="emphasis"><em>127.0.0.1</em></span> and
+root@<span class="emphasis"><em>rhce1</em></span> are two different accounts, which each can have their own password.</p><p>Then there is an guest accout accessible to everyone, intended for testing, and a test
+database accessible to everyone, also for testing. These should be removed for production use.</p><p>This can all be done using sql commands, but is a bit tedious, so there is a script
+provided which will guide you through all the steps and does the updates to the mariadb for you:</p><pre class="literallayout">mysql_secure_installation</pre><p>This script can also restrict root access from localhost only.</p><p>One could go further to rename the root account</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_adding_sample_data"></a>20.2. Adding sample data</h3></div></div></div><p>There is an official sample database, also used for trainings. It is publicly available:</p><pre class="literallayout">wget http://downloads.mysql.com/docs/world_innodb.sql.gz</pre><p>Firt we need to create the database:</p><pre class="literallayout">mysql -u root -p
+&gt; create database world;
+&gt; exit;</pre><p>Then we load the unzipped data into that database:</p><pre class="literallayout">mysql -u root -p world  &lt;/tmp/world_innodb.sql</pre></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_navigating_a_database"></a>20.3. Navigating a database</h3></div></div></div><p>Note the syntax: <code class="literal">mysql -u &lt;username&gt; -p &lt;databasename&gt;</code>. The <code class="literal">-p</code> specifies to ask for a password,
+alternativly you could also give the password on the commandline: <code class="literal">--password=xxxxx</code>, which is
+less favorable form a security standpoint.</p><p>Now login again as root</p><pre class="literallayout">mysql -u root -p</pre><p>and see which databases we have:</p><pre class="literallayout">&gt; show databases;</pre><p>select a database and see which tables it has:</p><pre class="literallayout">&gt; use world;
+&gt; show tables;</pre></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_creating_users"></a>20.4. Creating users</h3></div></div></div><p>Depending on the setup, it can be good practise to create at least two users per database. One that can only
+read, and one that can also write and create new tables:</p><pre class="literallayout">&gt; grant all on world.* to 'world-admin'@'10.23.23.%' identified by 'xxxxx';
+&gt; grant select on world.* to 'world-user'@'10.23.23.%' identified by 'xxxxx';
+&gt; flush privileges;</pre><p>Note the use of the wildcarc <code class="literal">%</code> in the host identifier - this allows access from the whole subnet.
+The "flush" command forces mariadb to reread the privileges database.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_crud"></a>20.5. CRUD</h3></div></div></div><p>CRUD is an abreviation for "Create Read Update Delete", which are common actions performed on a database.
+A Read in MariaDB is done using the "select" statemente, e.g.:</p><pre class="literallayout">mysql -u world-user -p -h rhce1
+use world;
+select Name from world where CountryCode='deu';
+select * from world where CountryCode='deu';
+select Name,CountryCode,Population from City where Name like '%ingen%';
+select Name,CountryCode,Population from City where 1 order by Population desc limit 3;
+select count(*), 'Citys in Germany' from City where CountryCode='deu';
+select count(*) as cnt, District from City where CountryCode='deu' group by District \
+    order by cnt desc;</pre><p>Create/Insert:</p><pre class="literallayout">insert into City (Name,District,CountryCode,Population) values ('Schoenau', \
+    'Baden Wuertemberg', 'deu', '2000');
+ERROR 1142 (42000): INSERT command denied to user 'world-user'@'rhce1.lcsys.ch' \
+    for table 'City'
+mysql -u world-admin -p -h rhce1
+use world;
+insert into City (Name,District,CountryCode,Population) values ('Schoenau', \
+   'Baden Wuertemberg', 'deu', '2000');</pre><p>Update:</p><pre class="literallayout">MariaDB [world]&gt; update City set Population = Population + 4 where Name='Schoenau';</pre><p>Delete:</p><pre class="literallayout">delete from City where Name='Schoenau';</pre></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_complex_queries"></a>20.6. Complex Queries</h3></div></div></div><pre class="literallayout">select * from City left join Country on City.CountryCode = Country.Code \
+    where City.Name = "Zürich";</pre><pre class="literallayout">select Country.Name from Country left join CountryLanguage on \
+    Country.Code = CountryLanguage.CountryCode where \
+    Language = "German" and IsOfficial = "T";</pre></div></div></div></body></html>

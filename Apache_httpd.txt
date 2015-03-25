@@ -1,0 +1,130 @@
+Apache httpd
+------------
+
+Basic virtual hosts
+~~~~~~~~~~~~~~~~~~~
+
+An example for a basic virtual host config is given in +/usr/share/doc/httpd-2.4.6/httpd-vhosts.conf+:
+
+    <VirtualHost *:@@Port@@>
+        ServerAdmin webmaster@dummy-host.example.com
+        DocumentRoot "@@ServerRoot@@/docs/dummy-host.example.com"
+        ServerName dummy-host.example.com
+        ServerAlias www.dummy-host.example.com
+        ErrorLog "/var/log/httpd/dummy-host.example.com-error_log"
+        CustomLog "/var/log/httpd/dummy-host.example.com-access_log" common
+    </VirtualHost>
+
+Note that +@@Port@@+ should be replaced with the actual port httpd is listening on, usually 80 or 443. 
+These configuration lines should be placed in a file in +/etc/httpd/conf.d+ with the ending +.conf+.
+
+https
+~~~~~
+Installing +mod_ssl+ also adds a default ssl config, which uses the self signed certificats which are
+already present on the server. These can be found in +/etc/pki/tls/certs+.
+
+https works out of the box, installing mod_ssl also puts a default
++/etc/httpd/conf.d/ssl.conf+ ssl config on your system.
+It is heavly documented, so probably no need to learn much by heart.
+ But if you want to customize your installation, e.g. with your own
+certificate, the following options could be helpfull:
+
+    SSLEngine on 
+    SSLProtocol All -SSLv2 -SSLv3 
+    SSLCipherSuite "EECDH+ECDSA+AESGCM EECDH+aRSA+AESGCM EECDH+ECDSA+SHA384 EECDH+ECDSA+SHA256 EECDH+aRSA+SHA384 EECDH+aRSA+SHA256 EECDH+aRSA+RC4 EECDH EDH +aRSA RC4 !aNULL !eNULL !LOW !3DES !MD5 !EXP !PSK !SRP !DSS" 
+    SSLHonorCipherOrder on 
+    SSLCertificateFile /etc/pki/tls/certs/mycrt.crt 
+    SSLCertificateKeyFile /etc/pki/tls/private/mycrt.key 
+    SSLCertificateChainFile /etc/pki/tls/certs/myca.crt
+
+Note that we are disableing SSLv2 and SSLv3, as these have been shown to be vulnerable by the poodle attack.
+
+The complete apache manual is available as the +httpd-manual+ package, which will install all of the official apache docs 
+in +/usr/share/httpd/manual+. Theses are html files, so its probably nicer to view them with a browser.
+It contains all the possible configuration options.
+
+If you want to automatically rewrite all http traffic to https, use the following directive:
+
+    RewriteEngine on 
+    RewriteRule ^(/.*)$ https://%{HTTP_HOST}$1 [redirect=301]
+
+It looks daunting to learn this by heart, but with a little understanding of regular expressions,
+ it is not that hard:
+First we look at the url (e.g. www.example.com/foo/bar ) 
+from the beginning (+^+) to the end (+$+). We want to extract the part after the hostname, which starts
+with a slash +/+. Everything behind that is matched with +.\*+ (+.+ matches any character, and +\*+ matches
+any number of charachters). Since we want to insert the matched part in the rewrite again, we need to 
+enclose it in brackets +(/.*)+ (this is called "numbered backreference").
+
+So that is the matching of incomming url. The next part is what the incomming url is rewritten to. It starts
+with +https://+, since the whole point of the exercise is to rewrite all traffic to https. Then comes the host
+name (obvious), and the comes +$1+, which is a reference to the machted expression from the incomming url.
+That is the expression matched previously within the brackets. In our example this is +/foo/bar+. 
+
+The last part is the http status message that the server sends to the client, in this case +[redirect=301]+.
+
+If you insert this line in e.g. in your virtual host block for http traffic, all will be redirected to https.
+
+apache and php
+~~~~~~~~~~~~~~
+
+To make apache able to run php script, you need to install the +php+ package. 
+Then you can have php commands in side the following tag:
+
+    <?php
+        //php command, e.g.
+        phpinfo();
+    ?>
+
+This must be inside a file with an +.php+ extension. The rest of the file can still contain html. 
+
+apache and python
+~~~~~~~~~~~~~~~~~
+
+To make apache execute python scripts, install +mod_wsgi+. That is almost enough to remember, the rest is in the docs that come along
+with the package. To find the docs, do something like
+
+    grep -Ri wsgi /usr/share
+
+This will turn up +/usr/share/doc/mod_wsgi-3.4/README+, which contains everything needed for a basic setup. It boils down to the following:
+
+Inside your virtualhost directive, add this line to tell apache what to do with a certain url:
+
+    WSGIScriptAlias /py /usr/local/apache/mypy.py
+
+Note that the python script resides outsite of the normal DocumentRoot. This is on purpose, as it might enable others to download
+the script itself if it would reside inside the doc root. But this also means that the script needs to be accessible and executable
+by the apache user. And because we have not set any specific restrictions on that dir yet, apache will deny everything, so we will need
+to allow access:
+
+    <Directory "/usr/local/apache">
+            Require all granted
+    </Directory>
+
+Next is to deploy a valid wsgi application. The README also provides a working example, which can be copied:
+
+    def application(environ, start_response):
+        status = '200 OK'
+        output = 'Hello World!'
+        response_headers = [('Content-type', 'text/plain'),
+                            ('Content-Length', str(len(output)))]
+        start_response(status, response_headers)
+        return [output]
+
+The important part is that it contains a function by the name of 'application'. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

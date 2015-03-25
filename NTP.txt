@@ -1,0 +1,29 @@
+NTP
+---
+
+There are two tools to synchronize time over network: the classic ntp, and the new chrony.
+
+ntpdate and ntpd
+~~~~~~~~~~~~~~~~
+
+If you want to manually synchronize the time, you can issue something like
+
+    ntpdate time.server.org
+
+where +time.server.org+ should be replaced with the fqdn of a real time server.
+You can also start the service +ntpd+, which will then periodically synchronize time.
+The downside of this is that ntpd can not correct bigger time differences.
+
+Time servers for ntpd are configured in +/etc/ntp.conf+, where a lot of examples
+are configured, so the syntax should be clear.
+
+chrony
+~~~~~~
+The newer chrony, part of systemd, is configured via +/etc/chrony.conf+. There you
+can define your time servers, the syntax is similar to ntpd - check the file for
+examples.
+
+chrony runs as a service called chronyd.
+
+
+

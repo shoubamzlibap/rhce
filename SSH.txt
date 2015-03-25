@@ -1,0 +1,20 @@
+SSH
+---
+
+Keys
+~~~~
+Keys are generated with +ssh-keygen+. It has a parameter to specify the "strength" in bytes:
+
+    ssh-keygen -b 4096
+
+The default for RHEL 7 /Centos 7 is 2048 for RSA keys. RSA keys are the default.
+
+
+Various
+~~~~~~~
+
+All sorts of other things can be done with the ssh client and server. Extensive documentation can be found in the man pages:
+
+    man sshd_config # server
+    man ssh_config # client
+

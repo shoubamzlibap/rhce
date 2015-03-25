@@ -1,0 +1,121 @@
+iscsi
+-------
+
+On the server
+~~~~~~~~~~~~~
+
+iscsi targets are managed with +targetcli+ (contained in the package by the same name). 
+In this example, we will add a second hard disk to our iscsi server ("target"), which
+is available under the name of +/dev/sdb+. The following sequence of commands is taken from the manpage of +targetcli+, where it is
+presented as a quick start, most of the explaning text is also copy/paste from the manpage (horray for manpages!).
+
+First we must create a backstore, which is a store that "backs" whatever will be exported. Different types are available, among these are
+FILEIO (usually a local disk image file, but can also be used to create a buffered block device) and BLOCK (for serving a block device
+which is attached locally).
+
+    backstores/block create my_disk /dev/sdb 
+
+Create an iSCSI target with a default WWN. It will also create an initial target portal group called tpg1.
+
+    iscsi/ create 
+    Created target iqn.2003-01.org.linux-iscsi.rhce2.x8664:sn.dcefd2a66602
+    Created TPG 1.
+
+
+Add a portal, i.e. an IP address and TCP port via which the target can be contacted by initiators. Sane defaults are used if  these  are  not
+specified.
+
+    cd iscsi/iqn.2003-01.org.linux-iscsi.rhce2.x8664:sn.dcefd2a66602/tpg1
+    portals/ create
+
+Create ACLs - who can access the lun? First look up your iscsi ID on the client:
+
+    [root@rhce1 ~]# cat /etc/iscsi/initiatorname.iscsi
+    InitiatorName=iqn.1994-05.com.redhat:8445b9e15b84
+
+Then, back on the server:
+
+    acls/ create iqn.1994-05.com.redhat:8445b9e15b84
+
+Create  a new LUN in the TPG, attached to the storage object that has previously been defined. The storage object now shows up under the /back‐
+stores configuration node as activated. Also, disable authentication, generate node acls (whatever that means ...), and save the configuration:
+
+    luns/ create /backstores/block/my_disk 
+    set attribute authentication=0 
+    set attribute generate_node_acls=1 
+    cd / 
+    saveconfig
+
+The last two steps are not really nessessary, if you just exit wit +exit+ the config will also be saved.
+
+In +targetcli+, you can always type +help+ to get a list of commands to navigate. Using the tab key, you will be presented with a list
+of currently (that is, with respect to your current location in the config tree) available commands. It will also show possible 
+options to commands that you have allready started typing - much like bash completion for e.g. nmcli.
+
+In case you messed up your config, and want to start from scratch, you can use
+
+    targetcli clearconfig confirm = true
+
+We will also need to open the corresponding firewall port
+
+    firewall-cmd --add-port=3260/tcp
+    firewall-cmd --add-port=3260/tcp --permanent
+    firewall-cmd --reload
+
+If you forget about which ports are used by default, you can always look them up:
+
+    [root@rhce2 ~]# grep iscsi-target /etc/services
+    iscsi-target    3260/tcp                # iSCSI port
+    iscsi-target    3260/udp                # iSCSI port
+
+
+
+On the client
+~~~~~~~~~~~~~
+
+First, install the client utilities:
+
+    yum install iscsi-initiator-utils
+
+Then discover the targets with +iscsiadm+ :
+
+    [root@rhce1 ~]# man iscsiadm
+    [root@rhce1 ~]# iscsiadm --mode discoverydb --type sendtargets --portal 10.23.23.52 --discover
+    10.23.23.52:3260,1 iqn.2003-01.org.linux-iscsi.rhce2.x8664:sn.a0504e72987a
+
+The man command is shown as the whole command is listed in the man page, so no need to remeber all the options.
+Note that the ip address is resolved to rhce2 - it is important to have dns working. This can be via +/etc/hosts+.
+
+Now we need to "login" to the target. The identifier used must be the one found by the previous discovery action.
+The exact syntax to login is written in the man page of +iscsiadm+.
+We use +lsblk+ bevor and after the login to show that we have a new device:
+
+    [root@rhce1 ~]# lsblk
+    NAME                        MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+    sda                           8:0    0    8G  0 disk
+      sda1                        8:1    0  500M  0 part /boot
+      sda2                        8:2    0  7.5G  0 part
+        centos_centosseven-swap 253:0    0  820M  0 lvm  [SWAP]
+        centos_centosseven-root 253:1    0  6.7G  0 lvm  /
+    sr0                          11:0    1 55.6M  0 rom
+    [root@rhce1 ~]# iscsiadm --mode node --targetname \
+        iqn.2003-01.org.linux-iscsi.rhce2.x8664:sn.a0504e72987a \
+        --portal 10.23.23.52:3260 --login
+    Logging in to [iface: default, target: iqn.2003-01.org.linux-iscsi.rhce2.x8664:sn.a0504e72987a, portal: 10.23.23.52,3260] (multiple)
+    Login to [iface: default, target: iqn.2003-01.org.linux-iscsi.rhce2.x8664:sn.a0504e72987a, portal: 10.23.23.52,3260] successful.
+    [root@rhce1 ~]# lsblk
+    NAME                        MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+    sda                           8:0    0    8G  0 disk
+      sda1                        8:1    0  500M  0 part /boot
+      sda2                        8:2    0  7.5G  0 part
+        centos_centosseven-swap 253:0    0  820M  0 lvm  [SWAP]
+        centos_centosseven-root 253:1    0  6.7G  0 lvm  /
+    sdb                           8:16   0    8G  0 disk
+    sr0                          11:0    1 55.6M  0 rom
+
+
+
+Now we can use the new device +/dev/sdb+ for whatever we want. If, after we created a filesystem, want to make the mount
+permanent, we must take care to add the option +_netdev+ to +/etc/fstab+, which tells mount that this device requires
+working networking. So the mount is delayed untill the network is available.
+

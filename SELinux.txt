@@ -1,0 +1,138 @@
+SELinux
+-------
+
+To manage various aspects of SELinux, a tool called +semanage+ is needed. It is not installed by default, even though SELinux
+is active by default. I did not know which package contained +semanage+, so I asked yum:
+
+    yum whatprovides semanage 
+    yum install policycoreutils-python selinux-policy-devel
+
+The second package is need for the manpages - this is something which you need to **remember by heart**.
+
+Various resources like files, directories, network ports (!) and processes have labels, which control which object can access
+which resource (or in which way). Each label has four components:
+
+    * user component (usually ends with _u)
+    * role component (usually ends with _r)
+    * type component (usually ends with _t)
+    * multi level security (MLS) component.
+
+I will not go into detail here, as it can become almost arbitrarly complex. The kernel manages the enforcement of the rules.
+
+If you copy a file, it will inherit its new label from its parent directory. If you move a file, it will keep its label, and
+you will probably need to run +restorecon+ to apply the proper label to it.
+
+The rules guiding the labeling are stored in txt files underneath +/etc/selinux/targeted/contexts/+.
+As you install new software with yum, these files will be  updated.
+
+To easily search for labels containing certain strings, you can use +semanage+ (also ports):
+
+    [root@rhce1 ~]# semanage port --list |grep ssh
+    ssh_port_t                     tcp      22
+    [root@rhce1 ~]# semanage fcontext --list |grep ssh
+    /etc/rc\.d/init\.d/sshd                            regular file       system_u:object_r:sshd_initrc_exec_t:s0
+    /etc/ssh/primes                                    regular file       system_u:object_r:sshd_key_t:s0
+    /etc/ssh/ssh_host.*_key                            regular file       system_u:object_r:sshd_key_t:s0
+    [...]
+
+
+Policys
+~~~~~~~
+
+The default policy is "strict", which means everything is denied except for explicitly allowed actions. This seems to be not
+so managebale in practise. Therefore, usually a "targeted" policy is used. This only restricts a few components, and allows the rest.
+In the "targeted" policy, only the type component of the label is checked.
+
+Booleans
+~~~~~~~~
+
+Certain settings of a policy are controlled by booleans, which can be toggeled at runtime. A list of available booleans can be viewed with
+
+    getsebool -a
+
+
+To set a boolean, use
+
+    setsebool -P <boolname> <value>
+
+The +-P+ option makes the change permanent, without it the change in bool setting will not survive a reboot.
+
+Audit
+~~~~~
+Policy violations (and also success) are logged in +/var/log/audit/audit.log+. So if something does not work, you can check
+there. In principal, everything is said there, but it is not the most human frindly format, there a tool has been defeloped,
+which can translate:
+
+    audit2why </var/log/audit/audit.log
+
+If you do not want to see the whole log, you can extract the line in question to a different file and pipe that to +audit2why+.
+
+You can also use +sealert+ to generate concrete semanage commads to fix your selinux problem. E.g. you want sshd to llisten also on port 2222. After configuring it, sshd won't start port 2222, but you get a message in the audit log.
+This cna be translated to a fix like this:
+
+	sealert -a /var/log/audit/audit.log
+
+This gives lots of output, among others:
+
+    # semanage port -a -t PORT_TYPE -p tcp 2222
+         where PORT_TYPE is one of the following: ssh_port_t, vnc_port_t, xserver_port_t.
+
+So you just execute the command given, and then sshd can listen on port 2222.
+
+SELinux in practise
+~~~~~~~~~~~~~~~~~~~
+If SELinux denies access to a file because of the wrong context (e.g. you have moved your .ssh/authorized_keys from somewhere else instead of
+creating it in place), you can restore the defined file context with +restorecon+:
+
+    restorecon -rv /home/isaac/.ssh
+
+This of course relies on files being in their standard location. In practise this is not always the case. E.g. you might have your http 
+doc root not in +/var/www/html+, but in +/opt/www/htmp+. +restorecon+ won't help much here, since it has no context for +/opt/www+ 
+yet. But you can create that context with +semanage+ ( +man semanage-fcontext+), provided you know which context you want. For this it is
+helpfull to create a file in the standard location and check which context gets applied to this file. In this case, it would be
++httpd_sys_content_t+.
+
+    semanage fcontext -a -t httpd_sys_content_t "/opt/www(/.*)?"
+
+This specific regualr expression is important, and it should be explained(???). The manpage for this particular subcommand 
+can be read with +man semanage-fcontext+
+
+A different approach is to take an existing directory with the correct context and use that as a template:
+
+    semanage fcontext -a -e /var/www/html /opt/www/html
+
+Both add new file context rules, which can then be applied with
+
+    restorecon -rv /opt/www/html
+
+Example:
+
+    [root@rhce1 html]# ls -lZ
+    -rw-r--r--. root root unconfined_u:object_r:user_tmp_t:s0 index.html
+    [root@rhce1 html]# semanage fcontext -a -e /var/www/html /opt/www/html
+    [root@rhce1 html]# restorecon -rv /opt/www/html/
+    restorecon reset /opt/www/html context unconfined_u:object_r:usr_t:s0->unconfined_u:object_r:httpd_sys_content_t:s0
+    restorecon reset /opt/www/html/index.html context unconfined_u:object_r:user_tmp_t:s0->unconfined_u:object_r:httpd_sys_content_t:s0
+    [root@rhce1 html]# ls -lZ
+    -rw-r--r--. root root unconfined_u:object_r:httpd_sys_content_t:s0 index.html
+
+
+If you want to run your service on a non-standard port, you need to add a suitable label to that port:
+
+    semanage port -a -t http_port_t -p tcp 8080
+
+This labels tcp port 8080 for use by httpd.
+
+Create your own SELinux module
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If there is no suitable file or port context for your needs, you can create your own packge, using +audit2allow+. 
+
+    audit2allow --input=myaudit.log --module-package=myaudit
+    semange --install myaudit.pp
+
++audit2allow+ will create a clear text file with .te ending, and a binary module with .pp ending. The binary can be installed with 
+semanage. Note that the +-i|--install+ option is not documented in the manpages.
+
+EXERCISE: do this httpd with custom doc root
+

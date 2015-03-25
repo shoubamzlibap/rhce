@@ -1,0 +1,73 @@
+DNS
+---
+
+There are two packages for doing DNS that will be examined here: bind and unbound. 
+
+Caching only name server with bind
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+bind is configured via +/etc/named.conf+. +named+ is also the name of the service. Details about the config can
+be found with +man named.conf+. Also, the default config file lists quite a few options. For a caching name server,
+the following directives are needed:
+
+    listen-on port 53 {any;};   // any could also be a semicolon seperated list of ip addresses
+    allow-query {localhost; 10.23.23.0/24 };
+    recursion yes;
+    forward only;
+    forwarders {8.8.8.8; };
+
+So here we define a DNS server that allows recursion ( which makes sense since it is caching only), and that forwards requests.
+A list of DNS servers is defined which the queries are forwarded to (+forwarders+), we listen on port 53 on all interfaces,
+and allow queries from localhost and the +10.23.23.0/24+ subnet. If everyone should be able to access the server, then the
++allow-query+ directive can be ommited.
+
+Now bevor starting the servic,e we can check the config for syntax errors:
+
+    named-checkconf
+
+If that did not show any errors, we can start named.
+
+You can get an answer from a specific server e.g. like this:
+
+    dig @localhost www.google.com
+
+
+
+Caching only name server with unbound
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+unbound is configured via +/etc/unbound/unbound.conf+. The default file is commented, so lots of options are already explained there.
+A minimal caching only nameserer would be configured like this:
+
+    server:
+            interface: 0.0.0.0
+            access-control: 10.23.23.0/24 allow
+            domain-insecure: "example.com"
+    remote-control:
+            control-enable: yes
+    forward-zone:
+            name: "."
+            forward-host: 8.8.8.8
+
+
+The option +domain-insecure+ specifies domains where validation should be ommited. This might be interesting for local zones.
+
+DNS-Troubleshooting
+~~~~~~~~~~~~~~~~~~~
+
+Maybe the best tool for dns troubleshooting is +dig+ (check +yum whatprovices dig+ for the package it is included with).
+
+The order in which dns queries are done (local, dns server, ...) is defined in +/etc/nsswitch+, in the line that starts
+with +hosts+. In order to check if your system is ok, you can compare the output of
+
+    dig @yournameserver www.google.com
+    getent hosts www.google.de
+
++getent+ respects +/etc/nsswitch+, so a difference in the output could hint to a problem with the local system.
+
+You could also force dig to use tcp (if udp is somehow blocked):
+
+    dig +tcp www.google.com
+
+
+

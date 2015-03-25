@@ -1,0 +1,18 @@
+Installing Software
+-------------------
+
+Software is installed using yum. It might be worth installing +yum-utils+, which 
+enhances yums capablities.
+
+If you would like to have a persistent cache of the metadata, you can tell yum to 
+keep the cache by setting
+
+    keepcache=1
+
+in +/etc/yum.conf+. After that you should clean and rebuild the cache:
+
+    yum clean all 
+    yum makecache
+
+Then you might want to have a cron job which keeps your cache up to date (e.g. +yum-updatesd+).
+
