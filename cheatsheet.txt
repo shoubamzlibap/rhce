@@ -1,0 +1,5 @@
+Personal cheatsheet for RHCE Exam 
+=================================
+Isaac Hailperin <isaac.hailperin@gmail.com>
+
+include::Cheatsheet.txt[]

@@ -1,7 +1,7 @@
 Cheatsheet
 ----------
 
-This is no intent to cheat, but rather a fictional cheat sheet. Here I write down bits and peaces that
+This is no intent to cheat, but rather a fictional cheat sheet. Here I write down bits and pieces that
 I find hard to remember. By writing them down here, I remember them, so no need to cheat :).
 
 Samba
@@ -16,3 +16,23 @@ In +/etc/sysconfig/nfs+, set +RPCNFSDARGS="-V 4.2"+. This allows you to export S
 
 Mount options: defaults,sec=krb5p,v4.2
 
+Restting the root password
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Boot with boot kernel option rd.break, mount -o remount,rw /sysroot, chroot /sysroot, passwd root, touch /.autorelabel, exit, reboot.
+
+MariaDB INSERT
+~~~~~~~~~~~~~~
+
+    insert into tablename (col1,col2) values ('val1', 'val2');
+
+SELinux
+~~~~~~~
+
+Get a list of all possible contexts with
+
+    seinfo -t
+
+Get concrete help for selinux problems which are logged to /var/log/audit/audit.log:
+
+    sealert -a /var/log/audit/audit.log

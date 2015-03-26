@@ -35,6 +35,15 @@ To easily search for labels containing certain strings, you can use +semanage+ (
     /etc/ssh/ssh_host.*_key                            regular file       system_u:object_r:sshd_key_t:s0
     [...]
 
+And to get a list of all possible contexts, use
+
+    seinfo -t 
+
+and then grep for what you are looking for, e.g. 
+
+    seinfo -t |grep samba
+
+to get all samba related contexts.
 
 Policys
 ~~~~~~~
