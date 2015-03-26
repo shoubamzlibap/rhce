@@ -4,7 +4,7 @@ Apache httpd
 Basic virtual hosts
 ~~~~~~~~~~~~~~~~~~~
 
-An example for a basic virtual host config is given in +/usr/share/doc/httpd-2.4.6/httpd-vhosts.conf+:
+An example for a basic virtual host config is given in +/usr/share/doc/httpd-2.4.6/httpd-vhosts.conf+ (see rpm -qd httpd):
 
     <VirtualHost *:@@Port@@>
         ServerAdmin webmaster@dummy-host.example.com

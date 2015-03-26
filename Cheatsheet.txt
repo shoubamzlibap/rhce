@@ -22,4 +22,10 @@ Insert into a table like this:
 
     MariaDB [databasename]> insert into tablename(col1name,col2name,col3name) values('foo','bar', 'foobar baz');
 
+Apache
+~~~~~~
+
+    rpm -qd httpd
+    -> among others an example virtual host conf
+
 
