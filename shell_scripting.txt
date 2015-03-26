@@ -9,6 +9,7 @@ Special Variables
 
 Some special variables
     $*  -  all parameter in one string
+    $@  -  all parameter in one string, each parameter quoted on its own.
     $#  -  number of parameters given to a script or function
 
 
