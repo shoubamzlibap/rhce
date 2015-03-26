@@ -16,3 +16,10 @@ In +/etc/sysconfig/nfs+, set +RPCNFSDARGS="-V 4.2"+. This allows you to export S
 
 Mount options: defaults,sec=krb5p,v4.2
 
+MariaDB
+~~~~~~~
+Insert into a table like this:
+
+    MariaDB [databasename]> insert into tablename(col1name,col2name,col3name) values('foo','bar', 'foobar baz');
+
+
