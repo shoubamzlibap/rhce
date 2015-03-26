@@ -36,3 +36,11 @@ Get a list of all possible contexts with
 Get concrete help for selinux problems which are logged to /var/log/audit/audit.log:
 
     sealert -a /var/log/audit/audit.log
+
+Apache
+~~~~~~
+
+    rpm -qd httpd
+    -> among others an example virtual host conf
+
+
